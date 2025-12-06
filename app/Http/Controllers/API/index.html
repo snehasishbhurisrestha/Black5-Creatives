@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Razorpay Payment</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+    <h2>Pay with Razorpay</h2>
+    <button id="rzp-button">Pay Now</button>
+
+    <pre id="result" style="background:#f4f4f4; padding:15px; margin-top:20px;"></pre>
+
+    <script>
+        // This would normally come from your backend API after creating the Razorpay order
+        var orderData = {
+            "status": true,
+            "message": "Razorpay Order Created Successfully.",
+            "data": {
+                "order_id": "order_RIv1JQamVEjaIg",
+                "amount": 10000,
+                "currency": "INR",
+                "receipt": "rcptid_68cb7e8804d7f",
+                "key": "rzp_test_3WmknLIqcUo9er"
+            }
+        };
+
+        var options = {
+            "key": orderData.data.key,
+            "amount": orderData.data.amount,
+            "currency": orderData.data.currency,
+            "name": "My Store",
+            "description": "Test Transaction",
+            "order_id": orderData.data.order_id,
+            "handler": function (response){
+                // Show JSON after payment
+                var result = {
+                    "razorpay_payment_id": response.razorpay_payment_id,
+                    "razorpay_order_id": response.razorpay_order_id,
+                    "razorpay_signature": response.razorpay_signature
+                };
+                document.getElementById("result").textContent = JSON.stringify(result, null, 4);
+            },
+            "theme": {
+                "color": "#3399cc"
+            }
+        };
+
+        var rzp1 = new Razorpay(options);
+        document.getElementById('rzp-button').onclick = function(e){
+            rzp1.open();
+            e.preventDefault();
+        }
+    </script>
+</body>
+</html>
