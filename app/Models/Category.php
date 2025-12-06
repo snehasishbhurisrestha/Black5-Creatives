@@ -13,7 +13,7 @@ class Category extends Model implements HasMedia
     
     protected $fillable = ['name', 'slug', 'parent_id', 'description', 'is_visible', 'is_home', 'is_popular', 'is_menu', 'is_special'];
 
-    protected $appends = ['image_link'];
+    protected $appends = ['image_link','banner_image_link'];
     
     public function parent()
     {
@@ -38,6 +38,11 @@ class Category extends Model implements HasMedia
     public function getImageLinkAttribute()
     {
         return $this->getFirstMediaUrl('category') ?: null;
+    }
+
+    public function getBannerImageLinkAttribute()
+    {
+        return $this->getFirstMediaUrl('category-banner') ?: null;
     }
 
     public function featurePanels()

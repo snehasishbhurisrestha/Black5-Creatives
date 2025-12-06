@@ -44,6 +44,7 @@ class CategoryController extends Controller implements HasMiddleware
             'parent_id' => 'nullable|exists:categories,id',
             'description' => 'nullable',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'banner_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:9216',
             'is_visible' => 'required|in:0,1'
         ]);
         if ($validator->fails()) {
@@ -59,6 +60,10 @@ class CategoryController extends Controller implements HasMiddleware
 
         if ($request->hasFile('image')) {
             $category->addMedia($request->file('image'))->toMediaCollection('category');
+        }
+
+        if ($request->hasFile('banner_image')) {
+            $category->addMedia($request->file('banner_image'))->toMediaCollection('category-banner');
         }
 
         $category->is_visible = $request->is_visible;
@@ -95,6 +100,7 @@ class CategoryController extends Controller implements HasMiddleware
             'parent_id' => 'nullable|exists:categories,id',
             'description' => 'nullable',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'banner_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:9216',
             'is_visible' => 'required|in:0,1'
         ]);
         if ($validator->fails()) {
@@ -113,6 +119,11 @@ class CategoryController extends Controller implements HasMiddleware
         if ($request->hasFile('image')) {
             $category->clearMediaCollection('category');
             $category->addMedia($request->file('image'))->toMediaCollection('category');
+        }
+
+        if ($request->hasFile('banner_image')) {
+            $category->clearMediaCollection('category-banner');
+            $category->addMedia($request->file('banner_image'))->toMediaCollection('category-banner');
         }
 
         $category->is_visible = $request->is_visible;
