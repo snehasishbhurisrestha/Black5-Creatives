@@ -53,7 +53,7 @@
 
                     <div class="mb-3">
                         <label>User <span class="text-danger">*</span></label>
-                        <select name="user_id" class="form-control" required>
+                        <select name="user_id" class="form-control select2" required>
                             <option value="">Select User</option>
                             @foreach($users as $user)
                                 <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
@@ -64,7 +64,7 @@
 
                     <div class="mb-3">
                         <label>Product <span class="text-danger">*</span></label>
-                        <select name="product_id" class="form-control" required>
+                        <select name="product_id" class="form-control select2" required>
                             <option value="">Select Product</option>
                             @foreach($products as $product)
                                 <option value="{{ $product->id }}">{{ $product->name }}</option>
