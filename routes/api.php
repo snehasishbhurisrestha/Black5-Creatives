@@ -49,6 +49,12 @@ Route::get('/auth/google/callback', [GoogleAuthApiController::class, 'handleGoog
 Route::post('/register', [AuthenticationApiController::class, 'register']);
 Route::post('/verify-otp', [AuthenticationApiController::class, 'verifyOtp']);
 
+Route::post('/forgot-password', [AuthenticationApiController::class, 'forgotPassword']);
+Route::post('/verify-forgot-otp', [AuthenticationApiController::class, 'verifyForgotOtp']);
+Route::post('/reset-password', [AuthenticationApiController::class, 'resetPassword']);
+Route::post('/resend-forgot-otp', [AuthenticationApiController::class, 'resendForgotOtp']);
+
+
 Route::post('/login', [AuthenticationApiController::class, 'login']);
 
 Route::prefix('feature-panels')->group(function () {
