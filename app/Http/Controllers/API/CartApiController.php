@@ -204,9 +204,14 @@ class CartApiController extends Controller
 
         $totalAmount = $data->sum('subtotal');
 
+        $grand_total = $totalAmount + 50;
+
         return apiResponse(true, 'Cart items fetched successfully.', [
             'items' => $data,
             'total_amount' => $totalAmount,
+            'shipping_charge' => 50,
+            'discount' => 0,
+            'grand_total' => $grand_total
         ], 200);
     }
 
