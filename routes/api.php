@@ -18,6 +18,7 @@ use App\Http\Controllers\API\{
     FeaturePanelApiController,
     PagesApiController,
     FAQApiController,
+    CategoryFreeOfferAPIController,
 };
 
 
@@ -69,7 +70,10 @@ Route::prefix('feature-panels')->group(function () {
 Route::get('/pages', [PagesApiController::class, 'index']); // list all pages
 Route::get('/pages/{slug}', [PagesApiController::class, 'show']);
 
+Route::get('/category-offer/{category_id}',[CategoryFreeOfferAPIController::class, 'getOffer']);
+
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user/category-offer/{category_id}',[CategoryFreeOfferAPIController::class, 'getOffer']);
 
     // Route::get('/products/{slug}', [ProductApiController::class, 'show']);
     // Route::get('/products/{slug}/related', [ProductApiController::class, 'related_products']);

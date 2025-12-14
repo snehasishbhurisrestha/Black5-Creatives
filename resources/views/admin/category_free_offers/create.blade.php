@@ -27,7 +27,7 @@
     </div>
 </div>
 
-<form action="{{ route('category_free_offer.store') }}" method="POST">
+<form action="{{ route('category_free_offer.store') }}" method="POST" enctype="multipart/form-data">
     @csrf
 
     <div class="section-body mt-4">
@@ -56,14 +56,22 @@
 
                             {{-- REQUIRED PURCHASE --}}
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Minimum Purchase Count <span class="text-danger">*</span></label>
-                                <input type="number" min="1" class="form-control" name="required_qty" required placeholder="Example: 10">
+                                <label class="form-label fw-bold">Minimum Purchase Count</label>
+                                <input type="number" min="1" class="form-control" id="required_qty"
+                                    name="required_qty" required>
                             </div>
+
 
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Free Product Count <span class="text-danger">*</span></label>
                                 <input type="number" min="1" class="form-control" name="free_product_qty" required placeholder="Example: 2">
                             </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Step Images</label>
+                                <div id="step-images-container"></div>
+                            </div>
+
 
                             {{-- FREE ITEMS BLOCK --}}
                             {{-- <div class="mb-3">
@@ -115,6 +123,23 @@
 
                 <!-- RIGHT SIDEBAR -->
                 <div class="col-lg-4">
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Main & Success Image</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Offer Image</label>
+                                <input type="file" name="offer_image" class="form-control" accept="image/*" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Success Image</label>
+                                <input type="file" name="success_image" class="form-control" accept="image/*" required>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="card">
                         <div class="card-header">
@@ -202,5 +227,24 @@
     });
 
     $(".select2").select2();
+</script>
+<script>
+    $('#required_qty').on('input', function () {
+        let qty = parseInt($(this).val());
+        let container = $('#step-images-container');
+        container.html('');
+
+        if (qty > 0) {
+            for (let i = 1; i <= qty; i++) {
+                container.append(`
+                    <div class="mb-2">
+                        <label class="form-label">Step Image ${i}</label>
+                        <input type="file" name="step_images[${i}]"
+                               class="form-control" accept="image/*" required>
+                    </div>
+                `);
+            }
+        }
+    });
 </script>
 @endsection

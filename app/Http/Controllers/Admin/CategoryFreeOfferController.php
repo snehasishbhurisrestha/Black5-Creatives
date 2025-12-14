@@ -37,7 +37,7 @@ class CategoryFreeOfferController extends Controller
     /**
      * Store a new offer
      */
-    public function store(Request $request)
+    /*public function store(Request $request)
     {
         $request->validate([
             'category_id' => 'required|exists:categories,id',
@@ -67,7 +67,51 @@ class CategoryFreeOfferController extends Controller
 
         return redirect()->route('category_free_offer.index')
                          ->with('success', 'Offer created successfully');
+    }*/
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'category_id' => 'required|exists:categories,id',
+            'required_qty' => 'required|integer|min:1',
+            'free_product_qty' => 'required|integer|min:1',
+
+            'offer_image' => 'required|image|max:9216',
+            'success_image' => 'required|image|max:9216',
+
+            'step_images' => 'required|array',
+            'step_images.*' => 'required|image|max:9216',
+        ]);
+
+        // Create Offer
+        $offer = CategoryFreeOffer::create([
+            'category_id' => $request->category_id,
+            'required_qty' => $request->required_qty,
+            'free_product_qty' => $request->free_product_qty,
+            'is_active' => $request->is_active ?? 0,
+        ]);
+
+        // Offer Image
+        $offer->addMedia($request->file('offer_image'))
+            ->toMediaCollection('offer_image');
+
+        // Success Image
+        $offer->addMedia($request->file('success_image'))
+            ->toMediaCollection('success_image');
+
+        // Step Images (1,2,3…N)
+        foreach ($request->file('step_images') as $step => $image) {
+            $offer->addMedia($image)
+                ->usingName('step_' . $step)
+                ->withCustomProperties(['step' => $step])
+                ->toMediaCollection('step_images');
+        }
+
+        return redirect()
+            ->route('category_free_offer.index')
+            ->with('success', 'Offer created successfully');
     }
+
 
     /**
      * Edit form
@@ -84,7 +128,7 @@ class CategoryFreeOfferController extends Controller
     /**
      * Update the offer
      */
-    public function update(Request $request, $id)
+    /*public function update(Request $request, $id)
     {
         $request->validate([
             'category_id' => 'required|exists:categories,id',
@@ -118,6 +162,99 @@ class CategoryFreeOfferController extends Controller
 
         return redirect()->route('category_free_offer.index')
                          ->with('success', 'Offer updated successfully');
+    }*/
+
+    public function update(Request $request, CategoryFreeOffer $category_free_offer)
+    {
+        $request->validate([
+            'category_id' => 'required|exists:categories,id',
+            'required_qty' => 'required|integer|min:1',
+            'free_product_qty' => 'required|integer|min:1',
+            'is_active' => 'sometimes|boolean',
+            
+            'offer_image' => 'sometimes|image|max:9216',
+            'success_image' => 'sometimes|image|max:9216',
+            'step_images' => 'sometimes|array',
+            'step_images.*' => 'sometimes|image|max:9216',
+        ]);
+
+        // Update basic offer info
+        $category_free_offer->update([
+            'category_id' => $request->category_id,
+            'required_qty' => $request->required_qty,
+            'free_product_qty' => $request->free_product_qty,
+            'is_active' => $request->is_active ?? 0,
+        ]);
+
+        // Handle offer image
+        if ($request->has('remove_offer_image')) {
+            // Remove current offer image
+            $category_free_offer->clearMediaCollection('offer_image');
+        }
+        
+        if ($request->hasFile('offer_image')) {
+            // Remove old if exists
+            $category_free_offer->clearMediaCollection('offer_image');
+            // Add new
+            $category_free_offer->addMedia($request->file('offer_image'))
+                ->toMediaCollection('offer_image');
+        }
+
+        // Handle success image
+        if ($request->has('remove_success_image')) {
+            $category_free_offer->clearMediaCollection('success_image');
+        }
+        
+        if ($request->hasFile('success_image')) {
+            $category_free_offer->clearMediaCollection('success_image');
+            $category_free_offer->addMedia($request->file('success_image'))
+                ->toMediaCollection('success_image');
+        }
+
+        // Handle step images removal
+        if ($request->has('remove_step_images')) {
+            foreach ($request->input('remove_step_images') as $mediaId) {
+                $category_free_offer->deleteMedia($mediaId);
+            }
+        }
+
+        // Handle new/replacement step images
+        if ($request->hasFile('step_images')) {
+            foreach ($request->file('step_images') as $step => $image) {
+                // Check if a step image already exists for this step
+                $existingMedia = $category_free_offer->getMedia('step_images')
+                    ->firstWhere('custom_properties.step', $step);
+                
+                if ($existingMedia) {
+                    // Replace existing
+                    $existingMedia->delete();
+                }
+                
+                // Add new step image
+                $category_free_offer->addMedia($image)
+                    ->usingName('step_' . $step)
+                    ->withCustomProperties(['step' => $step])
+                    ->toMediaCollection('step_images');
+            }
+        }
+
+        // Handle case when required_qty is reduced
+        $currentStepImages = $category_free_offer->getMedia('step_images');
+        if ($currentStepImages->count() > $request->required_qty) {
+            // Remove excess step images (keep only required_qty)
+            $imagesToKeep = $currentStepImages->sortBy('custom_properties.step')
+                ->take($request->required_qty);
+            
+            $imagesToRemove = $currentStepImages->diff($imagesToKeep);
+            
+            foreach ($imagesToRemove as $image) {
+                $image->delete();
+            }
+        }
+
+        return redirect()
+            ->route('category_free_offer.index')
+            ->with('success', 'Offer updated successfully');
     }
 
     /**

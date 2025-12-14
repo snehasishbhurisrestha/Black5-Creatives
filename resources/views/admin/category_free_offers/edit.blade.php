@@ -27,7 +27,7 @@
     </div>
 </div>
 
-<form action="{{ route('category_free_offer.update', $offer->id) }}" method="POST">
+<form action="{{ route('category_free_offer.update', $offer->id) }}" method="POST" enctype="multipart/form-data">
     @csrf
     @method('PUT')
 
@@ -44,11 +44,11 @@
 
                             {{-- CATEGORY --}}
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Category <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold">Select Category <span class="text-danger">*</span></label>
                                 <select name="category_id" class="form-control select2" required>
+                                    <option value="">-- Select Category --</option>
                                     @foreach ($categories as $category)
-                                        <option value="{{ $category->id }}"
-                                            {{ $offer->category_id == $category->id ? 'selected' : '' }}>
+                                        <option value="{{ $category->id }}" {{ $offer->category_id == $category->id ? 'selected' : '' }}>
                                             {{ $category->name }}
                                         </option>
                                     @endforeach
@@ -57,75 +57,155 @@
 
                             {{-- REQUIRED PURCHASE --}}
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Minimum Purchase Count <span class="text-danger">*</span></label>
-                                <input type="number" min="1" class="form-control" 
-                                       name="required_qty" value="{{ $offer->required_qty }}" required>
+                                <label class="form-label fw-bold">Minimum Purchase Count</label>
+                                <input type="number" min="1" class="form-control" id="required_qty"
+                                    name="required_qty" value="{{ $offer->required_qty }}" required>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Free Product Count <span class="text-danger">*</span></label>
-                                <input type="number" min="1" class="form-control" value="{{ $offer->free_product_qty }}" name="free_product_qty" required placeholder="Example: 2">
+                                <input type="number" min="1" class="form-control" name="free_product_qty" 
+                                    value="{{ $offer->free_product_qty }}" required placeholder="Example: 2">
                             </div>
 
-                            {{-- FREE ITEMS --}}
-                            {{-- <div class="mb-3">
-                                <label class="form-label fw-bold">Free Variations <span class="text-danger">*</span></label>
-
-                                <div id="free-items-container">
-
-                                    @foreach ($offer->items as $index => $item)
-                                        <div class="free-item-row row mb-2">
-
-                                            <div class="col-md-7">
-                                                <select name="free_variations[{{ $index }}][variation_option_id]" class="form-control select2" required>
-                                                    <option value="">Select Variation</option>
-
-                                                    @foreach ($variationOptions as $opt)
-                                                        <option value="{{ $opt->id }}"
-                                                            {{ $item->variation_option_id == $opt->id ? 'selected' : '' }}>
-                                                            {{ $opt->variation->product->name ?? 'Unknown Product' }}
-                                                            — {{ $opt->variation_name }}
-                                                        </option>
-                                                    @endforeach
-
-                                                </select>
+                            {{-- STEP IMAGES SECTION --}}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Step Images</label>
+                                <div id="step-images-container">
+                                    @php
+                                        $stepImages = $offer->getMedia('step_images');
+                                        $stepImagesCount = $stepImages->count();
+                                    @endphp
+                                    
+                                    @if($stepImagesCount > 0)
+                                        @foreach($stepImages as $index => $stepImage)
+                                            @php
+                                                $stepNumber = $stepImage->getCustomProperty('step', $index + 1);
+                                            @endphp
+                                            <div class="mb-2">
+                                                <label class="form-label">Step Image {{ $stepNumber }}</label>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="me-3 mb-2">
+                                                        <img src="{{ $stepImage->getUrl() }}" 
+                                                             alt="Step {{ $stepNumber }}" 
+                                                             class="img-thumbnail" 
+                                                             style="width: 100px; height: 100px; object-fit: cover;">
+                                                        <div class="form-check mt-1">
+                                                            <input type="checkbox" 
+                                                                   name="remove_step_images[{{ $stepImage->id }}]" 
+                                                                   value="{{ $stepImage->id }}" 
+                                                                   class="form-check-input remove-step-checkbox">
+                                                            <label class="form-check-label text-danger">
+                                                                Remove Image
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <input type="file" name="step_images[{{ $stepNumber }}]"
+                                                               class="form-control step-file-input" 
+                                                               accept="image/*">
+                                                        <small class="text-muted">
+                                                            Leave empty to keep current image
+                                                        </small>
+                                                    </div>
+                                                </div>
                                             </div>
-
-                                            <div class="col-md-3">
-                                                <input type="number" class="form-control"
-                                                       name="free_variations[{{ $index }}][free_qty]"
-                                                       value="{{ $item->free_qty }}" min="1" required>
+                                        @endforeach
+                                    @endif
+                                    
+                                    {{-- New step images input (for when required_qty increases) --}}
+                                    @if($stepImagesCount < $offer->required_qty)
+                                        @for($i = $stepImagesCount + 1; $i <= $offer->required_qty; $i++)
+                                            <div class="mb-2">
+                                                <label class="form-label">Step Image {{ $i }} (New)</label>
+                                                <input type="file" name="step_images[{{ $i }}]"
+                                                       class="form-control" accept="image/*" required>
                                             </div>
-
-                                            <div class="col-md-2">
-                                                <button type="button" class="btn btn-danger remove-row w-100">X</button>
-                                            </div>
-
-                                        </div>
-                                    @endforeach
-
+                                        @endfor
+                                    @endif
                                 </div>
-
-                                <button type="button" class="btn btn-info mt-2" id="add-free-item">
-                                    + Add More Free Item
-                                </button>
-                            </div> --}}
-
-                            {{-- DESCRIPTION --}}
-                            {{-- <div class="mb-3">
-                                <label class="form-label fw-bold">Description (Optional)</label>
-                                <textarea name="description" class="form-control" rows="3">
-                                    {{ $offer->description }}
-                                </textarea>
-                            </div> --}}
+                            </div>
 
                         </div>
                     </div>
                 </div>
 
-                <!-- RIGHT -->
+                <!-- RIGHT SIDEBAR -->
                 <div class="col-lg-4">
 
+                    {{-- IMAGES CARD --}}
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Main & Success Image</h3>
+                        </div>
+                        <div class="card-body">
+                            {{-- OFFER IMAGE --}}
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Offer Image</label>
+                                @if($offer->hasMedia('offer_image'))
+                                    <div class="mb-2">
+                                        @php
+                                            $offerImage = $offer->getFirstMedia('offer_image');
+                                        @endphp
+                                        <img src="{{ $offerImage->getUrl() }}" 
+                                             alt="Current Offer Image" 
+                                             class="img-thumbnail mb-2"
+                                             style="width: 100%; height: 200px; object-fit: cover;">
+                                        <div class="form-check">
+                                            <input type="checkbox" id="remove_offer_image" 
+                                                   name="remove_offer_image" value="{{ $offerImage->id }}" 
+                                                   class="form-check-input remove-image-checkbox">
+                                            <label class="form-check-label text-danger" for="remove_offer_image">
+                                                Remove current image
+                                            </label>
+                                        </div>
+                                    </div>
+                                @endif
+                                <input type="file" name="offer_image" class="form-control" accept="image/*">
+                                <small class="text-muted">
+                                    @if($offer->hasMedia('offer_image'))
+                                        Leave empty to keep current image
+                                    @else
+                                        Please upload an offer image
+                                    @endif
+                                </small>
+                            </div>
+
+                            {{-- SUCCESS IMAGE --}}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Success Image</label>
+                                @if($offer->hasMedia('success_image'))
+                                    <div class="mb-2">
+                                        @php
+                                            $successImage = $offer->getFirstMedia('success_image');
+                                        @endphp
+                                        <img src="{{ $successImage->getUrl() }}" 
+                                             alt="Current Success Image" 
+                                             class="img-thumbnail mb-2"
+                                             style="width: 100%; height: 200px; object-fit: cover;">
+                                        <div class="form-check">
+                                            <input type="checkbox" id="remove_success_image" 
+                                                   name="remove_success_image" value="{{ $successImage->id }}"
+                                                   class="form-check-input remove-image-checkbox">
+                                            <label class="form-check-label text-danger" for="remove_success_image">
+                                                Remove current image
+                                            </label>
+                                        </div>
+                                    </div>
+                                @endif
+                                <input type="file" name="success_image" class="form-control" accept="image/*">
+                                <small class="text-muted">
+                                    @if($offer->hasMedia('success_image'))
+                                        Leave empty to keep current image
+                                    @else
+                                        Please upload a success image
+                                    @endif
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- STATUS CARD --}}
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Offer Status</h3>
@@ -137,26 +217,24 @@
                         </div>
 
                         <div class="card-body">
-
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Status</label>
-
+                                <label class="form-label d-flex fw-bold">Status</label>
                                 <div class="form-check form-check-inline">
-                                    <input type="radio" name="is_active" value="1" class="form-check-input"
-                                        {{ $offer->is_active == 1 ? 'checked' : '' }}>
-                                    <label class="form-check-label">Active</label>
+                                    <input type="radio" id="status1" name="is_active" value="1" 
+                                           class="form-check-input" {{ $offer->is_active == 1 ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="status1">Active</label>
                                 </div>
-
                                 <div class="form-check form-check-inline">
-                                    <input type="radio" name="is_active" value="0" class="form-check-input"
-                                        {{ $offer->is_active == 0 ? 'checked' : '' }}>
-                                    <label class="form-check-label">Inactive</label>
+                                    <input type="radio" id="status2" name="is_active" value="0" 
+                                           class="form-check-input" {{ $offer->is_active == 0 ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="status2">Inactive</label>
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn btn-primary w-100 mb-2">Update Offer</button>
-                            <a href="{{ route('category_free_offer.index') }}" class="btn btn-secondary w-100">Cancel</a>
-
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-primary w-100 mb-2">Update Offer</button>
+                                <a href="{{ route('category_free_offer.index') }}" class="btn btn-secondary w-100">Cancel</a>
+                            </div>
                         </div>
                     </div>
 
@@ -172,44 +250,76 @@
 
 @section('script')
 <script>
-    let rowIndex = {{ count($offer->items) }};
+    // Dynamic step images generation when required_qty changes
+    $('#required_qty').on('input', function () {
+        let currentQty = parseInt($(this).val());
+        let container = $('#step-images-container');
+        let existingImages = $('.step-file-input').length; // Count existing file inputs
+        
+        // Clear only if we're decreasing and removing all images
+        if (currentQty < existingImages) {
+            // Ask for confirmation
+            if (confirm('Reducing the purchase count will remove step images beyond the new count. Continue?')) {
+                container.html('');
+                
+                // Rebuild the form for the new count
+                for (let i = 1; i <= currentQty; i++) {
+                    container.append(`
+                        <div class="mb-2">
+                            <label class="form-label">Step Image ${i} (New)</label>
+                            <input type="file" name="step_images[${i}]"
+                                   class="form-control" accept="image/*" required>
+                        </div>
+                    `);
+                }
+            } else {
+                // Reset to original value
+                $(this).val({{ $offer->required_qty }});
+            }
+        } else if (currentQty > existingImages) {
+            // Add new step image inputs for additional steps
+            for (let i = existingImages + 1; i <= currentQty; i++) {
+                container.append(`
+                    <div class="mb-2">
+                        <label class="form-label">Step Image ${i} (New)</label>
+                        <input type="file" name="step_images[${i}]"
+                               class="form-control" accept="image/*" required>
+                    </div>
+                `);
+            }
+        }
+    });
 
-    $("#add-free-item").click(function () {
-        let row = `
-            <div class="free-item-row row mb-2">
+    // Handle image removal checkboxes
+    document.addEventListener('DOMContentLoaded', function() {
+        // For main images
+        document.querySelectorAll('.remove-image-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const fileInput = this.closest('.mb-4, .mb-3').querySelector('input[type="file"]');
+                if (this.checked) {
+                    fileInput.required = true;
+                } else {
+                    fileInput.required = false;
+                }
+            });
+        });
+        
+        // For step images
+        document.querySelectorAll('.remove-step-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const fileInput = this.closest('.mb-2').querySelector('.step-file-input');
+                if (this.checked) {
+                    fileInput.required = true;
+                } else {
+                    fileInput.required = false;
+                }
+            });
+        });
+    });
 
-                <div class="col-md-7">
-                    <select name="free_variations[${rowIndex}][variation_option_id]" class="form-control select2" required>
-                        <option value="">Select Variation</option>
-                        @foreach ($variationOptions as $opt)
-                            <option value="{{ $opt->id }}">
-                                {{ $opt->variation->product->name ?? 'Unknown Product' }} — {{ $opt->variation_name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="col-md-3">
-                    <input type="number" name="free_variations[${rowIndex}][free_qty]" min="1" value="1" class="form-control" required>
-                </div>
-
-                <div class="col-md-2">
-                    <button type="button" class="btn btn-danger remove-row w-100">X</button>
-                </div>
-
-            </div>
-        `;
-
-        $("#free-items-container").append(row);
+    // Initialize select2
+    $(document).ready(function() {
         $(".select2").select2();
-
-        rowIndex++;
     });
-
-    $(document).on('click', '.remove-row', function () {
-        $(this).closest('.free-item-row').remove();
-    });
-
-    $(".select2").select2();
 </script>
 @endsection
