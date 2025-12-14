@@ -101,6 +101,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user/add-addresses', [UserApiController::class, 'addAddress']);
     Route::put('/user/update-addresses/{id}', [UserApiController::class, 'updateAddress']);
     Route::delete('/user/delete-addresses/{id}', [UserApiController::class, 'deleteAddress']); 
+
+    Route::post('reviews/store', [ProductReviewApiController::class, 'store']);
 });
 
 Route::get('/countries', [LocationApiController::class, 'getCountries']);

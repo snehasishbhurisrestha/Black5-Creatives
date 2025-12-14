@@ -14,7 +14,7 @@ class ProductReviewController extends Controller
     // Show all reviews
     public function index()
     {
-        $reviews = ProductReview::with(['user', 'product'])->latest()->paginate(10);
+        $reviews = ProductReview::with(['user', 'product'])->latest()->get();
         return view('admin.reviews.index', compact('reviews'));
     }
 
@@ -118,6 +118,16 @@ class ProductReviewController extends Controller
         $media->delete();
 
         return back()->with('success', 'Media deleted successfully.');
+    }
+
+    public function update_approuval(Request $request, $id){
+        $review = ProductReview::findOrFail($id);
+
+        $review->is_approved = 1;
+
+        $review->update();
+
+        return back()->with('success', 'Review updated successfully.');
     }
 
 }

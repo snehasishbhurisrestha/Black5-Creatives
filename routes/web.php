@@ -221,6 +221,7 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('contact-us', ContactUsController::class);
         Route::delete('/reviews/media-delete/{review}/media/{media}', [ProductReviewController::class, 'destroyMedia'])->name('reviews.media.destroy');
+        Route::get('/reviews/approved/{id}', [ProductReviewController::class, 'update_approuval'])->name('reviews.approved');
         Route::resource('reviews', ProductReviewController::class);
         Route::resource('faqs', FAQController::class);
         Route::post('/faqs/reorder', [FAQController::class, 'reorder'])->name('faqs.reorder');

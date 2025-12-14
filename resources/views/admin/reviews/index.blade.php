@@ -49,6 +49,7 @@
                                         <th>Review Text</th>
                                         <th>Media</th>
                                         <th>Created At</th>
+                                        <th>Approval</th>
                                         @canany(['Review Edit','Review Delete'])
                                         <th>Action</th>
                                         @endcanany
@@ -119,6 +120,13 @@
 
                                         </td>
                                         <td>{{ format_datetime($review->created_at) }}</td>
+                                        <td>
+                                            @if(!$review->is_approved)
+                                            <a class="btn btn-success btn-sm" href="{{ route('reviews.approved',$review->id) }}">Approve</a>
+                                            @else
+                                            <span class="text-success">Approved</span>
+                                            @endif
+                                        </td>
                                         @canany(['Review Edit','Review Delete'])
                                         <td>
                                             @can('Review Edit')
@@ -137,9 +145,6 @@
                                     @endforeach
                                 </tbody>
                             </table>
-                        </div>
-                        <div class="mt-3">
-                            {{ $reviews->links() }}
                         </div>
                     </div>
                 </div>
