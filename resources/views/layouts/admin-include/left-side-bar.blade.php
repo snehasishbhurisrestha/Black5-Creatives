@@ -113,6 +113,35 @@
                     @can('ContactUs Show')
                     <li class="active"><a href="{{ route('contact-us.index') }}"><i class="fa fa-envelope"></i><span>Contact Us</span></a></li>
                     @endcan
+
+                    @canany(['Sales Report', 'Orders Report', 'Products Report', 'Payments Report', 'Customers Report'])
+                    <li>
+                        <a href="javascript:;">
+                            <i class="fa fa-bar-chart"></i><span>Reports</span>
+                        </a>
+                        <ul>
+                            @can('Sales Report')
+                            <li><a href="{{ route('reports.sales') }}">Sales Report</a></li>
+                            @endcan
+
+                            @can('Orders Report')
+                            <li><a href="{{ route('reports.orders') }}">Orders Report</a></li>
+                            @endcan
+
+                            {{-- @can('Products Report')
+                            <li><a href="{{ route('reports.products') }}">Products Report</a></li>
+                            @endcan --}}
+
+                            @can('Payments Report')
+                            <li><a href="{{ route('reports.payments') }}">Payments Report</a></li>
+                            @endcan
+
+                            {{-- @can('Customers Report')
+                            <li><a href="{{ route('reports.customers') }}">Customers Report</a></li>
+                            @endcan --}}
+                        </ul>
+                    </li>
+                    @endcanany
                 </ul>
             </nav>
         </div>

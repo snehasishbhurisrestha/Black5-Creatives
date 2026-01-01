@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\{
     OfferController,
     FAQController,
     CategoryFreeOfferController,
+    ReportController,
 };
 
 use App\Http\Controllers\Site\{
@@ -228,6 +229,14 @@ Route::middleware('auth')->group(function () {
 
 
         Route::resource('category_free_offer',CategoryFreeOfferController::class);
+
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('/sales', [ReportController::class, 'sales'])->name('sales');
+            Route::get('/orders', [ReportController::class, 'orders'])->name('orders');
+            Route::get('/products', [ReportController::class, 'products'])->name('products');
+            Route::get('/payments', [ReportController::class, 'payments'])->name('payments');
+            Route::get('/customers', [ReportController::class, 'customers'])->name('customers');
+        });
     });
 
 });
