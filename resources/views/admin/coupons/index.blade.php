@@ -34,32 +34,115 @@
                             <table class="table table-hover js-basic-example dataTable table-striped table_custom border-style spacing5">
                                 <thead class="table-light">
                                     <tr>
+                                        <th>Image</th>
                                         <th>Code</th>
                                         <th>Type</th>
-                                        <th>Value</th>
-                                        <th>Minimum Purchase</th>
-                                        <th>Start Date</th>
-                                        <th>End Date</th>
-                                        <th>Usage Type</th>
+                                        <th>Offer Detail</th>
+                                        <th>Category</th>
+                                        <th>Min Qty</th>
+                                        <th>Min Purchase</th>
                                         <th>Status</th>
-                                        <th>Created At</th>
+                                        <th>Valid Date</th>
+                                        <th>Created</th>
+
                                         @canany(['Coupon Edit','Coupon Delete'])
                                         <th>Action</th>
                                         @endcanany
                                     </tr>
                                 </thead>
+
                                 <tbody>
                                     @foreach($coupons as $coupon)
                                     <tr>
-                                        <td class="text-wrap">{{ $coupon->code }}</td>
-                                        <td class="text-wrap">{{ $coupon->type }}</td>
-                                        <td class="text-wrap">{{ $coupon->value }}</td>
-                                        <td class="text-wrap">{{ $coupon->minimum_purchase }}</td>
-                                        <td class="text-wrap">{{ $coupon->start_date }}</td>
-                                        <td class="text-wrap">{{ $coupon->end_date }}</td>
-                                        <td class="text-wrap">{{ $coupon->usage_type }}</td>
-                                        <td>{!! check_visibility($coupon->is_active) !!}</td>
-                                        <td class="text-wrap">{{ format_datetime($coupon->created_at) }}</td>
+
+                                        {{-- IMAGE --}}
+                                        <td>
+                                            @php
+                                                $img = $coupon->getFirstMediaUrl('coupon_image');
+                                            @endphp
+
+                                            @if($img)
+                                                <img src="{{ $img }}" width="60" style="border-radius:8px;">
+                                            @else
+                                                <span class="badge bg-secondary">No Image</span>
+                                            @endif
+                                        </td>
+
+                                        <td>{{ $coupon->code }}</td>
+
+                                        {{-- TYPE --}}
+                                        <td>
+                                            <span class="badge bg-info">
+                                                {{ strtoupper($coupon->type) }}
+                                            </span>
+                                        </td>
+
+                                        {{-- SMART OFFER DISPLAY --}}
+                                        <td>
+                                            @if($coupon->type == 'percentage')
+                                                {{ $coupon->value }}% OFF
+                                            @elseif($coupon->type == 'flat')
+                                                ₹{{ $coupon->value }} OFF
+                                            @elseif($coupon->type == 'free_shipping')
+                                                <span class="badge bg-success">Free Shipping</span>
+                                            @elseif($coupon->type == 'bogo')
+                                                Buy {{ $coupon->buy_qty }} Get {{ $coupon->get_qty }}
+                                                @if($coupon->free_product_type)
+                                                    ({{ $coupon->free_product_type }})
+                                                @endif
+                                            @elseif($coupon->type == 'price_override')
+                                                Special Price: ₹{{ $coupon->override_price }}
+                                            @endif
+                                        </td>
+
+                                        {{-- CATEGORY --}}
+                                        <td>
+                                            @if($coupon->category)
+                                                <span class="badge bg-dark">{{ $coupon->category }}</span>
+                                            @else
+                                                Any
+                                            @endif
+
+                                            <br>
+
+                                            @if($coupon->product_type)
+                                                <small class="text-primary">{{ $coupon->product_type }}</small>
+                                            @endif
+                                        </td>
+
+                                        {{-- MIN QTY --}}
+                                        <td>
+                                            {{ $coupon->min_qty ?? '-' }}
+                                        </td>
+
+                                        {{-- MIN PURCHASE --}}
+                                        <td>
+                                            ₹{{ $coupon->minimum_purchase ?? 0 }}
+                                        </td>
+
+                                        {{-- STATUS --}}
+                                        <td>
+                                            @if($coupon->is_active)
+                                                <span class="badge bg-success">Active</span>
+                                            @else
+                                                <span class="badge bg-danger">Inactive</span>
+                                            @endif
+                                        </td>
+
+                                        {{-- DATES --}}
+                                        <td>
+                                            <small>
+                                                {{ $coupon->start_date ? $coupon->start_date->format('d M Y h:i A') : '-' }}
+                                                <br>
+                                                to
+                                                <br>
+                                                {{ $coupon->end_date ? $coupon->end_date->format('d M Y h:i A') : '-' }}
+                                            </small>
+                                        </td>
+
+                                        <td>{{ format_datetime($coupon->created_at) }}</td>
+
+                                        {{-- ACTIONS --}}
                                         @canany(['Coupon Edit','Coupon Delete'])
                                         <td>
                                             @can('Coupon Edit')
@@ -67,19 +150,27 @@
                                                 <i class="fa fa-edit"></i>
                                             </a>
                                             @endcan
-                                            @can('Coupon Edit')
-                                            <form action="{{ route('coupon.destroy', $coupon->id) }}" onsubmit="return confirm('Are you sure?')" method="POST" style="display:inline;">
+
+                                            @can('Coupon Delete')
+                                            <form action="{{ route('coupon.destroy', $coupon->id) }}"
+                                                onsubmit="return confirm('Are you sure?')"
+                                                method="POST"
+                                                style="display:inline;">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="btn btn-icon btn-sm" type="submit"><i class="fa fa-trash-o text-danger"></i></button>
+                                                <button class="btn btn-icon btn-sm" type="submit">
+                                                    <i class="fa fa-trash-o text-danger"></i>
+                                                </button>
                                             </form>
                                             @endcan
                                         </td>
                                         @endcanany
+
                                     </tr>
                                     @endforeach
                                 </tbody>
                             </table>
+
                         </div>
                     </div>
                 </div>

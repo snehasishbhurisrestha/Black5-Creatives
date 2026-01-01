@@ -90,7 +90,7 @@ Route::get('/', function () {
 // Route::post('checkout/process',[Checkout::class, 'process_checkout'])->name('checkout.process');
 // Route::post('/razorpay/callback', [Checkout::class, 'razorpay_callback'])->name('razorpay.callback');
 
-// Route::get('order/{order_number}/invoice',[Checkout::class, 'invoice'])->name('invoice')->middleware(['auth', 'verified']);
+Route::get('order/{order_number}/invoice',[Checkout::class, 'invoice'])->name('invoice')->middleware(['auth', 'verified']);
 
 // Route::middleware('auth')->group(function () {
 //     Route::controller(UserDashboard::class)->group(function () {

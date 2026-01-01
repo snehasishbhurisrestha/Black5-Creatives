@@ -35,6 +35,20 @@
         }
     }
 
+    if(!function_exists('cart_item_count')){
+        function cart_item_count($user_id = null){
+            $userId = $user_id ?? Auth::check() ? Auth::id() : Cookie::get('guest_user_id');
+            // $carts = Cart::where('user_id', $userId)->with('product')->get();
+
+            // $totalPrice = $carts->sum(function ($cart) {
+            //     return $cart->product->total_price * $cart->quantity;
+            // });
+            $cart_count = Cart::where('user_id', $userId)->count(); 
+
+            return $cart_count;
+        }
+    }
+
     if(!function_exists('calculate_cart_sub_total_by_userId')){
         function calculate_cart_sub_total_by_userId(int $userId)
         {

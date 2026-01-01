@@ -19,6 +19,7 @@ use App\Http\Controllers\API\{
     PagesApiController,
     FAQApiController,
     CategoryFreeOfferAPIController,
+    SilverCardApiController,
 };
 
 
@@ -71,6 +72,8 @@ Route::get('/pages', [PagesApiController::class, 'index']); // list all pages
 Route::get('/pages/{slug}', [PagesApiController::class, 'show']);
 
 Route::get('/category-offer/{category_id}',[CategoryFreeOfferAPIController::class, 'getOffer']);
+
+Route::get('/get-silver-card-offer',[SilverCardApiController::class, 'index']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user/category-offer/{category_id}',[CategoryFreeOfferAPIController::class, 'getOffer']);

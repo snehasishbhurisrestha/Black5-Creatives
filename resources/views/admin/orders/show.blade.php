@@ -197,7 +197,7 @@
                                 <tr>
                                     {{-- <td>{{ $item->product_id }}</td> --}}
                                     <td>
-                                        <a href="{{ route('product.details',$item->product->slug) }}" target="_blank">
+                                        <a href="javascript:void(0);" target="_blank">
                                             <img src="{{ getProductMainImage($item->product->id) }}" data-src="" alt="" class="lazyload img-responsive post-image" style="width:80px;" />
                                         </a>
                                         {{ $item->product_name }}

@@ -202,14 +202,21 @@ class CartApiController extends Controller
             ];
         });
 
+        $total_cart_item = $cartItems->count();
+        if($total_cart_item > 3){
+            $shipping_charge = 0;
+        }else{
+            $shipping_charge = 50;
+        }
+
         $totalAmount = $data->sum('subtotal');
 
-        $grand_total = $totalAmount + 50;
+        $grand_total = $totalAmount + $shipping_charge;
 
         return apiResponse(true, 'Cart items fetched successfully.', [
             'items' => $data,
             'total_amount' => $totalAmount,
-            'shipping_charge' => 50,
+            'shipping_charge' => $shipping_charge,
             'discount' => 0,
             'grand_total' => $grand_total
         ], 200);

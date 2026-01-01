@@ -75,6 +75,15 @@ class CheckoutApiController extends Controller
 
         $cart_total = calculate_cart_total($request->user()->id);
 
+        $cart_count = cart_item_count($request->user()->id);
+        if($cart_count > 3){
+            $shipping_charge = 0;
+        }else{
+            $shipping_charge = 50;
+        }
+
+        $cart_total += $shipping_charge;
+
         $api = new Api(env('RAZORPAY_KEY'), env('RAZORPAY_SECRET'));
 
         $orderData = [
@@ -154,7 +163,15 @@ class CheckoutApiController extends Controller
         }
 
         $cart_sub_total = calculate_cart_sub_total_by_userId($user_id);
-        $cart_total = calculate_cart_total();
+        $cart_total = calculate_cart_total($user_id);
+        $cart_count = cart_item_count($user_id);
+        if($cart_count > 3){
+            $shipping_charge = 0;
+        }else{
+            $shipping_charge = 50;
+        }
+        $cart_total += $shipping_charge;
+
         $coupone_discount = 0.00;
         $coupone_code = null;
 
@@ -171,9 +188,9 @@ class CheckoutApiController extends Controller
         $order->coupone_discount = $coupone_discount;
         $order->price_subtotal = $cart_sub_total;
         $order->price_gst = 0.00;
-        $order->price_shipping = 0.00;
+        $order->price_shipping = $shipping_charge;
         $order->total_amount = $cart_total;
-        $order->discounted_price = $cart_sub_total - $cart_total;
+        $order->discounted_price = ($cart_sub_total - $cart_total) + $shipping_charge;
         $order->payment_method = $payment_method ?? '';
         $order->payment_status = $payment_method === 'Razorpay' ? 'success' : 'pending';
         $order->transaction_id = $razorpay_payment_id;
@@ -203,6 +220,8 @@ class CheckoutApiController extends Controller
             $order_item->product_id = $cart_item->product_id;
             $order_item->product_variation_options_id = $cart_item->product_variation_options_id;
             $order_item->product_name = $cart_item->product->name;
+            $order_item->brand_name = $cart_item->brand_name;
+            $order_item->model_name = $cart_item->model_name;
 
             if ($cart_item->productVariationOption) {
                 $order_item->product_name .= ' (' . $cart_item->productVariationOption->variation_name . ')';

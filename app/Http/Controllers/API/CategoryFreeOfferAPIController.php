@@ -31,9 +31,15 @@ class CategoryFreeOfferAPIController extends Controller
 
             $userId = $request->user()->id;
 
+            // $orderCount = Order::where('user_id', $userId)
+            //     ->where('order_status', 'delivered')
+            //     ->count();
             $orderCount = Order::where('user_id', $userId)
-                ->where('order_status', 'delivered')
-                ->count();
+                                ->where('order_status', 'delivered')
+                                ->whereHas('items.product.categories', function ($q) use ($category_id) {
+                                    $q->where('category_id', $category_id);
+                                })
+                                ->count();
 
             // ✅ Completed all required orders
             if ($orderCount >= $offer->required_qty) {
