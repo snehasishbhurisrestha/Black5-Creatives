@@ -56,7 +56,7 @@
         <div class="container">
 
             <div class="text-center pb-5">
-                <img src="{{ asset('assets/admin-assets/images/navbar-logo.webp') }}" alt="" style="height: 50px;">
+                <img src="{{ asset('assets/admin-assets/images/navbar-logo2.png') }}" alt="" style="height: 50px;">
                 {{-- <h1>{{ config('app.name', 'Laravel') }}</h1> --}}
             </div>
 

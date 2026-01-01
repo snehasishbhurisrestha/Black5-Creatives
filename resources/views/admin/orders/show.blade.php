@@ -201,6 +201,17 @@
                                             <img src="{{ getProductMainImage($item->product->id) }}" data-src="" alt="" class="lazyload img-responsive post-image" style="width:80px;" />
                                         </a>
                                         {{ $item->product_name }}
+                                        @if(!empty($item->brand_name))
+                                            <span class="badge bg-primary ms-2">
+                                                {{ $item->brand_name }}
+                                            </span>
+                                        @endif
+
+                                        @if(!empty($item->model_name))
+                                            <span class="badge bg-success ms-1">
+                                                {{ $item->model_name }}
+                                            </span>
+                                        @endif
                                     </td>
                                     <td>{{ $item->price }}</td>
                                     <td>{{ $item->quantity }}</td>
