@@ -223,7 +223,7 @@
                                 </div>
                                 <div class="row mb-0">
                                     <label for="example-text-input" class="col-sm-4 col-form-label float-end">Shipping</label>
-                                    <div class="col-sm-8"><strong class="float-end">{{ $shipping }}</strong></div>
+                                    <div class="col-sm-8"><strong class="float-end">{{ $order->price_shipping }}</strong></div>
                                 </div>
                                 <div class="row mb-0">
                                     <label for="example-text-input" class="col-sm-4 col-form-label float-end">Coupon Discount</label>

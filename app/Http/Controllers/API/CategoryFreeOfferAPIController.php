@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\CategoryFreeOffer;
 use App\Models\Order;
+use App\Models\OrderItems;
 use Illuminate\Http\Request;
 
 class CategoryFreeOfferAPIController extends Controller
@@ -34,12 +35,14 @@ class CategoryFreeOfferAPIController extends Controller
             // $orderCount = Order::where('user_id', $userId)
             //     ->where('order_status', 'delivered')
             //     ->count();
-            $orderCount = Order::where('user_id', $userId)
-                                ->where('order_status', 'delivered')
-                                ->whereHas('items.product.categories', function ($q) use ($category_id) {
-                                    $q->where('category_id', $category_id);
-                                })
-                                ->count();
+            $orderCount = OrderItems::whereHas('order', function ($q) use ($userId) {
+                    $q->where('user_id', $userId)
+                    ->where('order_status', 'delivered');
+                })
+                ->whereHas('product.categories', function ($q) use ($category_id) {
+                    $q->where('category_id', $category_id);
+                })
+                ->count();
 
             // ✅ Completed all required orders
             if ($orderCount >= $offer->required_qty) {

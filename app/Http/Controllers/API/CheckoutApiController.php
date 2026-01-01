@@ -76,7 +76,7 @@ class CheckoutApiController extends Controller
         $cart_total = calculate_cart_total($request->user()->id);
 
         $cart_count = cart_item_count($request->user()->id);
-        if($cart_count > 3){
+        if($cart_count > 2){
             $shipping_charge = 0;
         }else{
             $shipping_charge = 50;
@@ -165,7 +165,7 @@ class CheckoutApiController extends Controller
         $cart_sub_total = calculate_cart_sub_total_by_userId($user_id);
         $cart_total = calculate_cart_total($user_id);
         $cart_count = cart_item_count($user_id);
-        if($cart_count > 3){
+        if($cart_count > 2){
             $shipping_charge = 0;
         }else{
             $shipping_charge = 50;

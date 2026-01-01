@@ -56,11 +56,11 @@
         <div class="container">
 
             <div class="text-center pb-5">
-                {{-- <img src="{{ asset('assets/site-assets/img/logo.png') }}" alt=""> --}}
-                <h1>M7 Prime</h1>
+                <img src="{{ asset('assets/admin-assets/images/navbar-logo.webp') }}" alt="" style="height: 50px;">
+                {{-- <h1>{{ config('app.name', 'Laravel') }}</h1> --}}
             </div>
 
-            <div class="d-md-flex justify-content-between" style="display:flex">
+            {{-- <div class="d-md-flex justify-content-between" style="display:flex">
                 <div>
                     <p class="fw-bold text-primary">Invoice To</p>
                     <h4>{{ $address_book->billing_first_name . ' ' . $address_book->billing_last_name }}</h4>
@@ -77,12 +77,55 @@
                 </div>
                 <div class="mt-md-0">
                     <p class="fw-bold text-primary">Invoice From</p>
-                    <h4>M7 Prime</h4>
+                    <h4>{{ config('app.name', 'Laravel') }}</h4>
                     <ul class="list-unstyled m-0">
-                       <li>Address</li>
+                       <li>Phone : +91 8697310898</li>
+                        <li>Address : Bally Ghoshpara, Paulpara, Near Level Crossing</li>
+                        <li>Country : India, 
+                            State : West Bengal, 
+                            City : Howrah</li>
+                        <li>Pin : 711227</li>
+                        <li>Email : priyanka.id2018@gmail.com</li>
                     </ul>
                 </div>
+            </div> --}}
+
+            <div class="d-md-flex justify-content-between gap-4">
+
+                <!-- Invoice To -->
+                <div class="mb-4 mb-md-0">
+                    <p class="fw-bold text-primary mb-1">Invoice To</p>
+                    <h4>{{ $address_book->billing_first_name }} {{ $address_book->billing_last_name }}</h4>
+
+                    <p class="mb-0">
+                        Phone: {{ $address_book->billing_phone_number }} <br>
+                        {{ $address_book->billing_address }} <br>
+
+                        {{ optional($address_book->city)->name }},
+                        {{ optional($address_book->state)->name }},
+                        {{ optional($address_book->country)->name }}<br>
+
+                        Pin: {{ $address_book->billing_zip_code }} <br>
+                        Email: {{ $address_book->billing_email }}
+                    </p>
+                </div>
+
+                <!-- Invoice From -->
+                <div>
+                    <p class="fw-bold text-primary mb-1">Invoice From</p>
+                    <h4>{{ config('app.name', 'Laravel') }}</h4>
+
+                    <p class="mb-0">
+                        Phone: +91 8697310898 <br>
+                        Bally Ghoshpara, Paulpara, Near Level Crossing <br>
+                        Howrah, West Bengal, India <br>
+                        Pin: 711227 <br>
+                        Email: priyanka.id2018@gmail.com
+                    </p>
+                </div>
+
             </div>
+
 
             <div class=" d-md-flex justify-content-between align-items-center border-top border-bottom border-primary my-2 py-3" style="display:flex;margin-bottom:0;">
                 <h2 class="display-6 fw-bold m-0">Invoice</h2>
@@ -115,7 +158,7 @@
                         <tr>
                             <td></td>
                             <td colspan="2" class="text-primary fs-5 fw-bold">Shipping Charges</td>
-                            <td class="text-primary fs-5 fw-bold">₹ 0.00</td>
+                            <td class="text-primary fs-5 fw-bold">₹ {{ $order->price_shipping }}</td>
                         </tr>
                         {{-- @if($order->coupone_discount > 0)
                         <tr>
@@ -145,11 +188,11 @@
                 <h5 class="fw-bold my-4">Contact Us</h5>
                     <ul class="list-unstyled">
                         <li><iconify-icon class="social-icon text-primary fs-5 me-2" icon="mdi:location"
-                                style="vertical-align:text-bottom"></iconify-icon>address</li>
+                                style="vertical-align:text-bottom"></iconify-icon>Bally Ghoshpara, Paulpara, Near Level Crossing,<br> Howrah 711227, West Bengal</li>
                         <li><iconify-icon class="social-icon text-primary fs-5 me-2" icon="solar:phone-bold"
-                                style="vertical-align:text-bottom"></iconify-icon> +91 9696969696</li>
+                                style="vertical-align:text-bottom"></iconify-icon> +91 8697310898</li>
                         <li><iconify-icon class="social-icon text-primary fs-5 me-2" icon="ic:baseline-email"
-                                style="vertical-align:text-bottom"></iconify-icon> m7prime@gmail.com</li>
+                                style="vertical-align:text-bottom"></iconify-icon> priyanka.id2018@gmail.com</li>
                     </ul>
                 </div>
 

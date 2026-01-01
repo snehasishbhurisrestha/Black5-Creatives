@@ -203,7 +203,7 @@ class CartApiController extends Controller
         });
 
         $total_cart_item = $cartItems->count();
-        if($total_cart_item > 3){
+        if($total_cart_item > 2){
             $shipping_charge = 0;
         }else{
             $shipping_charge = 50;
