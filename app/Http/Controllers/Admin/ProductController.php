@@ -506,6 +506,50 @@ class ProductController extends Controller implements HasMiddleware
         }
     }
 
+    public function updateVariation(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $variation = ProductVariation::findOrFail($id);
+        $variation->update([
+            'name' => $request->name
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Variation updated successfully'
+        ]);
+    }
+
+    public function updateVariationOption(Request $request, $id)
+    {
+        $option = ProductVariationOption::findOrFail($id);
+
+        $data = $request->validate([
+            'variation_name' => 'required|string|max:255',
+            'price' => 'nullable|numeric',
+            'stock' => 'nullable|integer',
+            'value' => 'nullable'
+        ]);
+
+        // Handle image upload
+        if ($request->hasFile('value')) {
+            $path = $request->file('value')->store('variation-options', 'public');
+            $data['value'] = $path;
+        }
+
+        $option->update($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Option updated successfully'
+        ]);
+    }
+
+
+
 
     public function destroy(string $id){
         $product = Product::findOrFail($id);

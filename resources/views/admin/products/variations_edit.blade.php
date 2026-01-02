@@ -74,7 +74,17 @@
                                         <tbody>
                                             @foreach($product->variations as $variation)
                                             <tr>
-                                                <td>{{ $variation->name }}</td>
+                                                {{-- <td>{{ $variation->name }}</td> --}}
+                                                <td>
+                                                    <input type="text"
+                                                        class="form-control variation-name"
+                                                        data-id="{{ $variation->id }}"
+                                                        value="{{ $variation->name }}">
+                                                    <button class="btn btn-sm btn-primary saveVariationBtn"
+                                                            data-id="{{ $variation->id }}">
+                                                        Save
+                                                    </button>
+                                                </td>
                                                 <td>
                                                     <table class="table table-bordered">
                                                         <thead>
@@ -100,9 +110,24 @@
                                                                         {{ $option->value }}
                                                                     @endif
                                                                 </td>
-                                                                <td>{{ $option->variation_name }}</td>
-                                                                <td>{{ $option->price }}</td>
-                                                                <td>{{ $option->stock }}</td>
+                                                                {{-- <td>{{ $option->variation_name }}</td> --}}
+                                                                <td>
+                                                                    <input type="text" class="form-control option-name"
+                                                                        data-id="{{ $option->id }}"
+                                                                        value="{{ $option->variation_name }}">
+                                                                </td>
+                                                                {{-- <td>{{ $option->price }}</td> --}}
+                                                                <td>
+                                                                    <input type="number" class="form-control option-price"
+                                                                        data-id="{{ $option->id }}"
+                                                                        value="{{ $option->price }}">
+                                                                </td>
+                                                                {{-- <td>{{ $option->stock }}</td> --}}
+                                                                <td>
+                                                                    <input type="number" class="form-control option-stock"
+                                                                        data-id="{{ $option->id }}"
+                                                                        value="{{ $option->stock }}">
+                                                                </td>
                                                                 <td>
                                                                     <form action="{{ route('products.destroyVariationOption', $option->id) }}" method="POST" style="display:inline;">
                                                                         @csrf
@@ -111,6 +136,10 @@
                                                                             <i class="fa fa-trash-o text-danger"></i>
                                                                         </button>
                                                                     </form>
+                                                                    <button class="btn btn-sm btn-success saveOptionBtn"
+                                                                            data-id="{{ $option->id }}">
+                                                                        Save
+                                                                    </button>
                                                                 </td>
                                                             </tr>
                                                             @endforeach
@@ -304,6 +333,43 @@
                 }
             });
 
+        });
+
+        $('.saveVariationBtn').click(function () {
+            let id = $(this).data('id');
+            let name = $(this).closest('tr').find('.variation-name').val();
+            let updateVariationUrl = "{{ route('products.variation.update', ':id') }}";
+            let url = updateVariationUrl.replace(':id', id);
+
+            $.post(url, {
+                _token: "{{ csrf_token() }}",
+                name: name
+            }, function (res) {
+                if (res.success) {
+                    showToast('success', 'Updated', res.message);
+                }
+            });
+        });
+
+
+
+        $('.saveOptionBtn').click(function () {
+            let id = $(this).data('id');
+            let row = $(this).closest('tr');
+
+            let updateVariationOptionUrl = "{{ route('products.variation-option.update', ':id') }}";
+            let urll = updateVariationOptionUrl.replace(':id', id);
+
+            $.post(urll, {
+                _token: "{{ csrf_token() }}",
+                variation_name: row.find('.option-name').val(),
+                price: row.find('.option-price').val(),
+                stock: row.find('.option-stock').val()
+            }, function (res) {
+                if (res.success) {
+                    showToast('success', 'Updated', res.message);
+                }
+            });
         });
     });
 </script>

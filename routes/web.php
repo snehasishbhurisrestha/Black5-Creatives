@@ -173,6 +173,15 @@ Route::middleware('auth')->group(function () {
                 
                 Route::get('variation-edit/{id?}','variation_edit')->name('products.variation-edit');
                 Route::post('variation-edit-process','variation_edit_process')->name('products.variation-edit-process');
+                // Variation
+                Route::post('variation/update/{id?}', [ProductController::class, 'updateVariation'])
+                    ->name('products.variation.update');
+
+                // Variation Option
+                Route::post('variation-option/update/{id?}', [ProductController::class, 'updateVariationOption'])
+                    ->name('products.variation-option.update');
+
+
                 Route::post('copy-variation', [ProductController::class, 'copyVariation'])->name('products.copyVariation');
 
                 Route::get('product-images-edit/{id?}','product_images_edit')->name('products.product-images-edit');
