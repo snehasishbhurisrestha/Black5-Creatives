@@ -48,7 +48,7 @@ class ProductController extends Controller implements HasMiddleware
             'brand' => 'nullable|exists:brands,id',
             'sort_description' => 'nullable',
             'long_description' => 'nullable',
-            'product_type' => 'nullable|in:simple,attribute',
+            'product_type' => 'nullable|in:simple,attribute,customise',
         ]);
         $product = new Product();
         $product->name = $request->product_name;
@@ -203,10 +203,11 @@ class ProductController extends Controller implements HasMiddleware
     public function inventory_edit_process(Request $request){ 
         $product = Product::find($request->id);
         $request->validate([
-            'sku' => 'required|unique:products,sku,'.$product->id,
+            'sku' => 'nullable|unique:products,sku,'.$product->id,
         ]);
         $product->sku = $request->sku;
         $product->stock	= $request->stock ?? 0;
+        $product->need_image = $request->need_image;
         $res = $product->update();
         if($res){
             // return redirect(route('products.variation-edit',$product->id))->with(['success'=>'Inventory Updated Successfully']);

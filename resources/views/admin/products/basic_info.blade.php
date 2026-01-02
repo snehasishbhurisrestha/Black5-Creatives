@@ -167,6 +167,10 @@
                                     <input type="radio" id="product_type2" name="product_type" class="form-check-input" value="attribute">
                                     <label class="form-check-label" for="product_type2">Attribute</label>
                                 </div>
+                                <div class="form-check form-check-inline">
+                                    <input type="radio" id="product_type3" name="product_type" class="form-check-input" value="customise">
+                                    <label class="form-check-label" for="product_type3">Customise</label>
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label mb-3 d-flex">Special Product</label>

@@ -20,6 +20,7 @@ use App\Http\Controllers\API\{
     FAQApiController,
     CategoryFreeOfferAPIController,
     SilverCardApiController,
+    CustomiseApiController,
 };
 
 
@@ -110,6 +111,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/user/delete-addresses/{id}', [UserApiController::class, 'deleteAddress']); 
 
     Route::post('reviews/store', [ProductReviewApiController::class, 'store']);
+
+    Route::get('customise-get', [CustomiseApiController::class, 'index']);
 });
 
 Route::get('/countries', [LocationApiController::class, 'getCountries']);

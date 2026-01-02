@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('slug')->unique();
-            $table->enum('product_type', ['simple', 'attribute'])->default('simple');
+            $table->enum('product_type', ['simple', 'attribute', 'customise'])->default('simple');
 
             $table->text('sort_description')->nullable();
             $table->longText('long_description')->nullable();
@@ -39,6 +39,7 @@ return new class extends Migration
             $table->tinyInteger('is_home')->default(0);
             $table->tinyInteger('is_featured')->default(0);
             $table->tinyInteger('is_visible')->default(0);
+            $table->string('need_image')->nullable();
             $table->timestamps();
         });
     }
