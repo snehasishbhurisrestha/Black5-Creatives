@@ -201,6 +201,13 @@
                                             <img src="{{ getProductMainImage($item->product->id) }}" data-src="" alt="" class="lazyload img-responsive post-image" style="width:80px;" />
                                         </a>
                                         {{ $item->product_name }}
+                                        {{-- PRODUCT TYPE --}}
+                                        @if($item->product->product_type === 'customise')
+                                            <span class="badge bg-warning ms-2">
+                                                Customised
+                                            </span>
+                                        @endif
+
                                         @if(!empty($item->brand_name))
                                             <span class="badge bg-primary ms-2">
                                                 {{ $item->brand_name }}
@@ -211,6 +218,29 @@
                                             <span class="badge bg-success ms-1">
                                                 {{ $item->model_name }}
                                             </span>
+                                        @endif
+
+                                        {{-- 🖼️ CUSTOMISE IMAGES --}}
+                                        @if($item->product->product_type === 'customise')
+
+                                            <div class="mt-2 d-flex flex-wrap gap-2">
+
+                                                {{-- SINGLE IMAGE --}}
+                                                @if($item->hasMedia('choice_image'))
+                                                    <img src="{{ $item->getFirstMediaUrl('choice_image') }}"
+                                                        class="border rounded"
+                                                        style="width:60px;height:60px;object-fit:cover;">
+                                                @endif
+
+                                                {{-- MULTIPLE IMAGES --}}
+                                                @foreach($item->getMedia('cart_images') as $media)
+                                                    <img src="{{ $media->getUrl() }}"
+                                                        class="border rounded"
+                                                        style="width:60px;height:60px;object-fit:cover;">
+                                                @endforeach
+
+                                            </div>
+
                                         @endif
                                     </td>
                                     <td>{{ $item->price }}</td>

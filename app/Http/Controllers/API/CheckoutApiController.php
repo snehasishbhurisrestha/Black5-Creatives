@@ -228,19 +228,49 @@ class CheckoutApiController extends Controller
             }
 
             $order_item->quantity = $cart_item->quantity;
-            if ($cart_item->product_variation_options_id) {
-                $order_item->price = $cart_item->productVariationOption->price;
-                $order_item->subtotal = $cart_item->productVariationOption->price * $cart_item->quantity;
-                // ProductVariationOption::where('id', $cart_item->product_variation_options_id)
-                //     ->decrement('stock', $cart_item->quantity);
-            } else {
-                $order_item->price = $cart_item->product->price;
-                $order_item->subtotal = $cart_item->product->price * $cart_item->quantity;
-                // Product::where('id', $cart_item->product_id)
-                //     ->decrement('stock', $cart_item->quantity);
+            // if ($cart_item->product_variation_options_id) {
+            //     $order_item->price = $cart_item->productVariationOption->price;
+            //     $order_item->subtotal = $cart_item->productVariationOption->price * $cart_item->quantity;
+            //     // ProductVariationOption::where('id', $cart_item->product_variation_options_id)
+            //     //     ->decrement('stock', $cart_item->quantity);
+            // } else {
+            //     $order_item->price = $cart_item->product->price;
+            //     $order_item->subtotal = $cart_item->product->price * $cart_item->quantity;
+            //     // Product::where('id', $cart_item->product_id)
+            //     //     ->decrement('stock', $cart_item->quantity);
+            // }
+
+            $price = 0;
+
+            if ($cart_item->variation && $cart_item->variation->price) {
+                $price += $cart_item->variation->price;
             }
 
+            if ($cart_item->variation2 && $cart_item->variation2->price) {
+                $price += $cart_item->variation2->price;
+            }
+
+            if ($price == 0) {
+                $price = $cart_item->product->price;
+            }
+
+            $order_item->price = $price;
+            $order_item->subtotal = $price * $cart_item->quantity;
+
+
             $order_item->save();
+
+            // ✅ COPY SINGLE IMAGE
+            if ($cart_item->hasMedia('choice_image')) {
+                $cart_item
+                    ->getFirstMedia('choice_image')
+                    ->copy($order_item, 'choice_image');
+            }
+
+            // ✅ COPY MULTIPLE IMAGES
+            foreach ($cart_item->getMedia('cart_images') as $media) {
+                $media->copy($order_item, 'cart_images');
+            }
         }
 
         // ✅ Clear cart after placing order

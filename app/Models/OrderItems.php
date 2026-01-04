@@ -5,9 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class OrderItems extends Model
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+
+class OrderItems extends Model implements HasMedia
 {
-    use HasFactory;
+    use HasFactory, InteractsWithMedia;
 
     public function product()
     {
@@ -23,4 +26,11 @@ class OrderItems extends Model
     {
         return $this->belongsTo(Order::class, 'order_id');
     }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('choice_image')->singleFile();
+        $this->addMediaCollection('cart_images');
+    }
+
 }

@@ -93,50 +93,88 @@ class CartApiController extends Controller
             'model_name' => $request->model_name,
         ]);
 
-        if ($request->filled('choice_image')) {
+        // if ($request->filled('choice_image')) {
 
-            $base64 = $request->choice_image;
+        //     $base64 = $request->choice_image;
 
-            preg_match('/^data:image\/(\w+);base64,/', $base64, $type);
+        //     preg_match('/^data:image\/(\w+);base64,/', $base64, $type);
+        //     $extension = $type[1];
+
+        //     $imageData = base64_decode(substr($base64, strpos($base64, ',') + 1));
+
+        //     $tempPath = storage_path('app/temp_' . Str::uuid() . '.' . $extension);
+        //     file_put_contents($tempPath, $imageData);
+
+        //     $cartItem
+        //         ->addMedia($tempPath)
+        //         ->toMediaCollection('choice_image');
+                
+        //     if (file_exists($tempPath)) {
+        //         unlink($tempPath);
+        //     }
+        // }
+
+        if ($request->filled('choise_image')) {
+
+            $base64 = preg_replace('/\s+/', '', $request->choise_image);
+
+            if (!preg_match('/^data:image\/(\w+);base64,/', $base64, $type)) {
+                return response()->json(['error' => 'Invalid image format'], 422);
+            }
+
             $extension = $type[1];
+            $imageData = base64_decode(
+                substr($base64, strpos($base64, ',') + 1),
+                true
+            );
 
-            $imageData = base64_decode(substr($base64, strpos($base64, ',') + 1));
-
-            $tempPath = storage_path('app/temp_' . Str::uuid() . '.' . $extension);
-            file_put_contents($tempPath, $imageData);
+            if ($imageData === false) {
+                return response()->json(['error' => 'Decode failed'], 422);
+            }
 
             $cartItem
-                ->addMedia($tempPath)
+                ->addMediaFromString($imageData)
+                ->usingFileName(Str::uuid() . '.' . $extension)
                 ->toMediaCollection('choice_image');
-                
-            if (file_exists($tempPath)) {
-                unlink($tempPath);
-            }
         }
+
 
         if ($request->has('images') && is_array($request->images)) {
 
             foreach ($request->images as $base64) {
 
-                if (!$base64) continue;
-
-                preg_match('/^data:image\/(\w+);base64,/', $base64, $type);
-                $extension = $type[1];
-
-                $imageData = base64_decode(substr($base64, strpos($base64, ',') + 1));
-
-                $tempPath = storage_path('app/temp_' . Str::uuid() . '.' . $extension);
-                file_put_contents($tempPath, $imageData);
-
-                $cartItem
-                    ->addMedia($tempPath)
-                    ->toMediaCollection('cart_images');
-
-                if (file_exists($tempPath)) {
-                    unlink($tempPath);
+                if (!$base64) {
+                    continue;
                 }
+
+                // Remove spaces/newlines
+                $base64 = preg_replace('/\s+/', '', $base64);
+
+                // Validate Base64 image
+                if (!preg_match('/^data:image\/(\w+);base64,/', $base64, $type)) {
+                    continue; // invalid image
+                }
+
+                $extension = $type[1] ?? 'png';
+
+                // Decode safely
+                $imageData = base64_decode(
+                    substr($base64, strpos($base64, ',') + 1),
+                    true
+                );
+
+                if ($imageData === false) {
+                    continue;
+                }
+
+                // Save to Spatie media
+                $cartItem
+                    ->addMediaFromString($imageData)
+                    ->usingFileName(Str::uuid() . '.' . $extension)
+                    ->toMediaCollection('cart_images');
             }
         }
+
 
         return apiResponse(true,$cartItem->product->name . ($variationName ? ' (' . $variationName . ')' : '') . ' added to cart successfully',null,200);
     }

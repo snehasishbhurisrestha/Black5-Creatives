@@ -78,6 +78,7 @@ Route::get('/get-silver-card-offer',[SilverCardApiController::class, 'index']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user/category-offer/{category_id}',[CategoryFreeOfferAPIController::class, 'getOffer']);
+    Route::get('/user/category-offer-details/{category_id}',[CategoryFreeOfferAPIController::class, 'platinum_card_details']);
 
     // Route::get('/products/{slug}', [ProductApiController::class, 'show']);
     // Route::get('/products/{slug}/related', [ProductApiController::class, 'related_products']);
@@ -120,5 +121,5 @@ Route::get('/states/{country_id}', [LocationApiController::class, 'getStates']);
 Route::get('/cities/{state_id}', [LocationApiController::class, 'getCities']);
 
 // Reviews
-Route::get('reviews', [ProductReviewApiController::class, 'index']);
-Route::get('reviews/{id}', [ProductReviewApiController::class, 'show']);
+Route::get('reviews/{product_id?}', [ProductReviewApiController::class, 'index']);
+// Route::get('reviews/{id}', [ProductReviewApiController::class, 'show']);
