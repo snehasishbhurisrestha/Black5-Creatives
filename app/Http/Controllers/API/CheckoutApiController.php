@@ -231,13 +231,13 @@ class CheckoutApiController extends Controller
             if ($cart_item->product_variation_options_id) {
                 $order_item->price = $cart_item->productVariationOption->price;
                 $order_item->subtotal = $cart_item->productVariationOption->price * $cart_item->quantity;
-                ProductVariationOption::where('id', $cart_item->product_variation_options_id)
-                    ->decrement('stock', $cart_item->quantity);
+                // ProductVariationOption::where('id', $cart_item->product_variation_options_id)
+                //     ->decrement('stock', $cart_item->quantity);
             } else {
                 $order_item->price = $cart_item->product->price;
                 $order_item->subtotal = $cart_item->product->price * $cart_item->quantity;
-                Product::where('id', $cart_item->product_id)
-                    ->decrement('stock', $cart_item->quantity);
+                // Product::where('id', $cart_item->product_id)
+                //     ->decrement('stock', $cart_item->quantity);
             }
 
             $order_item->save();

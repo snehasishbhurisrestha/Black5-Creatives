@@ -5,7 +5,7 @@
     use Illuminate\Support\Facades\Auth;
     use Illuminate\Support\Facades\Cookie;
 
-    if(!function_exists('calculate_cart_total')){
+    /*if(!function_exists('calculate_cart_total')){
         function calculate_cart_total($user_id = null){
             $userId = $user_id ?? Auth::check() ? Auth::id() : Cookie::get('guest_user_id');
             // $carts = Cart::where('user_id', $userId)->with('product')->get();
@@ -33,7 +33,50 @@
 
             return $totalPrice;
         }
+    }*/
+
+    if (!function_exists('calculate_cart_total')) {
+
+        function calculate_cart_total($user_id = null)
+        {
+            $userId = $user_id
+                ?? (Auth::check() ? Auth::id() : Cookie::get('guest_user_id'));
+
+            $carts = Cart::where('user_id', $userId)
+                ->with(['product', 'variation', 'variation2'])
+                ->get();
+
+            $totalPrice = $carts->sum(function ($cart) {
+
+                $price = 0;
+
+                // variation 1
+                if ($cart->variation && $cart->variation->price) {
+                    $price += $cart->variation->price;
+                }
+
+                // variation 2
+                if ($cart->variation2 && $cart->variation2->price) {
+                    $price += $cart->variation2->price;
+                }
+
+                // fallback to product price
+                if ($price == 0) {
+                    $price = $cart->product->total_price;
+                }
+
+                return $price * $cart->quantity;
+            });
+
+            // Apply coupon
+            if (session()->has('applied_coupon')) {
+                $totalPrice -= session('applied_coupon.discount');
+            }
+
+            return max($totalPrice, 0);
+        }
     }
+
 
     if(!function_exists('cart_item_count')){
         function cart_item_count($user_id = null){

@@ -4,12 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Cart extends Model
+class Cart extends Model implements HasMedia
 {
-    use HasFactory;
+    use HasFactory, InteractsWithMedia;
 
-    protected $fillable = ['user_id', 'product_id', 'product_variation_options_id', 'quantity', 'brand_name', 'model_name'];
+    protected $fillable = ['user_id', 'product_id', 'product_variation_options_id', 'product_variation_options_id2', 'quantity', 'brand_name', 'model_name'];
 
     public function product()
     {
@@ -24,5 +26,10 @@ class Cart extends Model
     public function variation()
     {
         return $this->belongsTo(ProductVariationOption::class, 'product_variation_options_id');
+    }
+
+    public function variation2()
+    {
+        return $this->belongsTo(ProductVariationOption::class, 'product_variation_options_id2');
     }
 }

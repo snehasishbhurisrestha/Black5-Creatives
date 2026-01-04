@@ -43,6 +43,7 @@ class ProductApiController extends Controller
 
         // Filter active only
         $query->where('is_visible', 1);
+        $query->whereIn('product_type', ['simple','attribute']);
 
         $products = $query->paginate(3);
 
@@ -57,6 +58,7 @@ class ProductApiController extends Controller
                 $q->where('categories.slug', $slug);
             })
             ->where('is_visible', 1)
+            ->whereIn('product_type', ['simple','attribute'])
             ->paginate(6);
 
         return apiResponse(true, 'Category Products', ['products' => $products], 200);
@@ -68,6 +70,7 @@ class ProductApiController extends Controller
         $products = Product::with(['categories', 'brands'])
             ->where('is_featured', 1)
             ->where('is_visible', 1)
+            ->whereIn('product_type', ['simple','attribute'])
             ->limit(10)
             ->get();
 
@@ -80,6 +83,7 @@ class ProductApiController extends Controller
         $products = Product::with(['categories', 'brand'])
             ->where('is_special', 1)
             ->where('is_visible', 1)
+            ->whereIn('product_type', ['simple','attribute'])
             ->limit(10)
             ->get();
 
@@ -117,6 +121,7 @@ class ProductApiController extends Controller
         }
         $query->where('is_visible', 1);
         $query->where('is_best_selling', 1);
+        $query->whereIn('product_type', ['simple','attribute']);
         $query->limit(10);
         $query->orderBy('created_at','desc');
         $products = $query->get();
@@ -239,6 +244,7 @@ class ProductApiController extends Controller
                 });
             }
         }
+        $query->whereIn('product_type', ['simple','attribute']);
 
         // $recent = $query->get()->pluck('product');
         $recent = $query->get();
@@ -274,6 +280,7 @@ class ProductApiController extends Controller
                 });
             })
             ->distinct()
+            ->whereIn('product_type', ['simple','attribute'])
             ->take(10)
             ->get();
 
