@@ -44,7 +44,7 @@ class BrandApiController extends Controller
         $query->where('is_visible', true);
         $query->where('parent_id', null);
 
-        $brands = $query->paginate(10); // or ->get() if no pagination
+        $brands = $query->get(); // or ->get() if no pagination
 
         return apiResponse(true,'Brands',['brands'=>$brands],200);
     }

@@ -109,30 +109,76 @@ class CouponController extends Controller implements HasMiddleware
     public function edit(string $id)
     {
         $coupon = Coupon::findOrFail($id);
-        return view('admin.coupons.edit',compact('coupon'));
+        $categorys = Category::all();
+        $product_options = ProductVariationOption::select('variation_name')
+                            ->distinct()
+                            ->get();
+
+        return view('admin.coupons.edit', compact('coupon','categorys','product_options'));
     }
+
 
     public function update(Request $request, string $id)
     {
-        $validated = $request->validate([
-            'code' => 'required|unique:coupons,code,' . $id,
-            'type' => 'required|in:percentage,flat',
-            'value' => 'required|numeric|min:0',
-            'minimum_purchase' => 'required|numeric|min:0',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'usage_type' => 'required|in:one-time,multiple',
-            'is_active' => 'nullable|boolean',
-        ]);
-
-        // Find the coupon by ID
         $coupon = Coupon::findOrFail($id);
 
-        // Update the coupon with validated data
+        $rules = [
+            'code' => 'required|unique:coupons,code,' . $id,
+            'type' => 'required|in:percentage,flat,free_shipping,bogo,price_override',
+
+            'minimum_purchase' => 'nullable|numeric|min:0',
+            'min_qty' => 'nullable|integer|min:1',
+
+            'category' => 'nullable|string',
+            'product_type' => 'nullable|string',
+
+            'usage_type' => 'required|in:one-time,multiple',
+            'is_active' => 'nullable|boolean',
+
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+
+            'description' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ];
+
+        // Required when percentage or flat
+        if (in_array($request->type, ['percentage', 'flat'])) {
+            $rules['value'] = 'required|numeric|min:0';
+        }
+
+        // Required when price override
+        if ($request->type === 'price_override') {
+            $rules['override_price'] = 'required|numeric|min:0';
+        }
+
+        // Required when BOGO
+        if ($request->type === 'bogo') {
+            $rules['buy_qty'] = 'required|integer|min:1';
+            $rules['get_qty'] = 'required|integer|min:1';
+            $rules['free_product_type'] = 'nullable|string';
+        }
+
+        $validated = $request->validate($rules);
+
+        // Default active flag
+        $validated['is_active'] = $request->is_active ?? 0;
+
+        // Update coupon
         $coupon->update($validated);
 
-        return redirect()->back()->with('success', 'Coupon Updated successfully!');
+        // Update Image (Spatie)
+        if ($request->hasFile('image')) {
+            $coupon->clearMediaCollection('coupon_image');
+            $coupon->addMedia($request->file('image'))
+                ->toMediaCollection('coupon_image');
+        }
+
+        return redirect()
+            ->route('coupon.index')
+            ->with('success', 'Coupon updated successfully!');
     }
+
 
     public function destroy(string $id)
     {

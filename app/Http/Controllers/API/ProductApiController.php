@@ -18,7 +18,8 @@ class ProductApiController extends Controller
     // 🔹 All products with filters + pagination
     public function index(Request $request)
     {
-        $query = Product::with(['categories', 'brands', 'variations.options']);
+        // $query = Product::with(['categories', 'brands', 'variations.options']);
+        $query = Product::with(['categories', 'variations.options']);
 
         // Search filter
         if ($request->has('search') && $request->search) {
@@ -53,7 +54,7 @@ class ProductApiController extends Controller
     // 🔹 Products by category
     public function byCategory($slug)
     {
-        $products = Product::with(['categories', 'brands', 'variations.options'])
+        $products = Product::with(['categories', 'variations.options'])
             ->whereHas('categories', function ($q) use ($slug) {
                 $q->where('categories.slug', $slug);
             })
@@ -104,7 +105,8 @@ class ProductApiController extends Controller
         //     ->limit(10)
         //     ->orderBy('created_at','desc')
         //     ->get();
-        $query = Product::with(['categories', 'brands', 'variations.options']);
+        // $query = Product::with(['categories', 'brands', 'variations.options']);
+        $query = Product::with(['categories', 'variations.options']);
 
         if ($request->has('type') && $request->type) {
             $type = $request->type;
@@ -132,7 +134,8 @@ class ProductApiController extends Controller
     // 🔹 Product details
     public function show(Request $request, $slug)
     {
-        $product = Product::with(['categories', 'brands', 'variations.options', 'reviews.user', 'reviews.media'])
+        // $product = Product::with(['categories', 'brands', 'variations.options', 'reviews.user', 'reviews.media'])
+        $product = Product::with(['categories', 'variations.options', 'reviews.user', 'reviews.media'])
             // ->findOrFail($id);
             ->where('slug',$slug)->first();
 
@@ -223,7 +226,8 @@ class ProductApiController extends Controller
         // $product_ids = $request->product_ids;
         $products_slugs = $request->product_ids;
 
-        $query = Product::with(['categories', 'brands', 'variations.options'])
+        // $query = Product::with(['categories', 'brands', 'variations.options'])
+        $query = Product::with(['categories', 'variations.options'])
                         // ->whereIn('id',$product_ids)
                         ->whereIn('slug',$products_slugs)
                         ->take(10);
@@ -256,7 +260,8 @@ class ProductApiController extends Controller
     public function related_products($slug)
     {
         // Load the current product with its categories and brand
-        $product = Product::with(['categories', 'brands', 'variations.options'])
+        // $product = Product::with(['categories', 'brands', 'variations.options'])
+        $product = Product::with(['categories', 'variations.options'])
             // ->findOrFail($id);
             ->where('slug',$slug)->first();
 

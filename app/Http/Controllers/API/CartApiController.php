@@ -361,7 +361,7 @@ class CartApiController extends Controller
     public function apply_coupon(Request $request, CouponService $couponService)
     {
         $validator = Validator::make($request->all(), [
-            'code' => 'required|string'
+            'coupon_code' => 'required|string'
         ]);
 
         if ($validator->fails()) {
@@ -406,7 +406,7 @@ class CartApiController extends Controller
         // return $couponItems;
 
         // 3️⃣ Apply coupon
-        $result = $couponService->apply($request->code, $couponItems);
+        $result = $couponService->apply($request->coupon_code, $couponItems);
 
         if (!$result['success']) {
             return apiResponse(false, $result['message'], null, 200);
@@ -423,7 +423,7 @@ class CartApiController extends Controller
         $grandTotal = max(($subtotal + $shipping) - $discount, 0);
 
         return apiResponse(true, 'Coupon applied successfully', [
-            'coupon_code' => $request->code,
+            'coupon_code' => $request->coupon_code,
             'coupon_type' => $result['type'],
             'subtotal' => $subtotal,
             'discount' => $discount,
