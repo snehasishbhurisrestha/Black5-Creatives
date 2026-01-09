@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('value'); // e.g., "Red", "Blue", "Small", "Large"
             $table->decimal('price', 10, 2)->nullable(); // Optional different price for this variation
             $table->integer('stock')->default(0); // Stock per variation
+            $table->string('need_image')->nullable();
             $table->timestamps();
         });
     }

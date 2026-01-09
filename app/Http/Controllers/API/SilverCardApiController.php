@@ -10,7 +10,12 @@ use Illuminate\Support\Facades\Validator;
 
 class SilverCardApiController extends Controller
 {
-    public function index(){
+    public function __construct() {
+        $this->phone_case_id = env('PHONE_CASE_ID');
+        $this->wall_art_id = env('WALL_ART_ID');
+    }
+
+    public function index(Request $request){
         $now = Carbon::now();
 
         $all_active_coupon = Coupon::where('is_active', 1)

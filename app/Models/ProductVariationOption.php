@@ -10,7 +10,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 class ProductVariationOption extends Model implements HasMedia
 {
     use InteractsWithMedia;
-    protected $fillable = ['variation_id','variation_type','variation_name','value','price','stock'];
+    protected $fillable = ['variation_id','variation_type','variation_name','value','price','stock','need_image'];
     protected $appends = ['images'];
     public function variation()
     {

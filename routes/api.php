@@ -91,6 +91,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-cart-items', [CartApiController::class, 'cart_items']);
     Route::post('/remove-from-cart', [CartApiController::class, 'remove_from_cart']);
 
+    Route::post('/apply-coupon', [CartApiController::class, 'apply_coupon']);
+
     Route::get('/get-saved-address', [CheckoutApiController::class, 'get_saved_address']);
     Route::post('/add-new-addresss-book', [CheckoutApiController::class, 'add_new_addresss_book']);
 

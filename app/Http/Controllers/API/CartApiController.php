@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\ProductVariationOption;
 use App\Models\Cart;
 use Illuminate\Support\Str;
+use App\Services\CouponService;
 
 class CartApiController extends Controller
 {
@@ -355,5 +356,79 @@ class CartApiController extends Controller
         $cartItem->delete();
 
         return apiResponse(true, $productName . ' removed from cart successfully.', null, 200);
+    }
+
+    public function apply_coupon(Request $request, CouponService $couponService)
+    {
+        $validator = Validator::make($request->all(), [
+            'code' => 'required|string'
+        ]);
+
+        if ($validator->fails()) {
+            return apiResponse(false, 'Validation error', $validator->errors(), 422);
+        }
+
+        $userId = $request->user()->id;
+
+        // 1️⃣ Load cart items
+        $cartItems = Cart::with([
+            'product:id,total_price,product_type',
+            'variation:id,price,variation_name'
+        ])
+        ->where('user_id', $userId)
+        ->get();
+
+        if ($cartItems->isEmpty()) {
+            return apiResponse(false, 'Cart is empty', null, 200);
+        }
+
+        // 2️⃣ Convert cart → coupon items
+        $couponItems = $cartItems->map(function ($item) {
+
+            $price = 0;
+
+            if ($item->variation && $item->variation->price) {
+                $price = $item->variation->price;
+            } else {
+                $price = $item->product->total_price;
+            }
+
+            return (object)[
+                'price' => $price,
+                'qty' => $item->quantity,
+                'category' => 'phone-case',
+                'product_type' => $item->variation
+                                ? $item->variation->variation_name
+                                : null,
+            ];
+        });
+
+        // return $couponItems;
+
+        // 3️⃣ Apply coupon
+        $result = $couponService->apply($request->code, $couponItems);
+
+        if (!$result['success']) {
+            return apiResponse(false, $result['message'], null, 200);
+        }
+
+        // 4️⃣ Calculate totals
+        $subtotal = $couponItems->sum(fn($i) => $i->price * $i->qty);
+
+        $discount = $result['discount'] ?? 0;
+
+        // Shipping logic
+        $shipping = $result['type'] === 'free_shipping' ? 0 : 50;
+
+        $grandTotal = max(($subtotal + $shipping) - $discount, 0);
+
+        return apiResponse(true, 'Coupon applied successfully', [
+            'coupon_code' => $request->code,
+            'coupon_type' => $result['type'],
+            'subtotal' => $subtotal,
+            'discount' => $discount,
+            'shipping' => $shipping,
+            'grand_total' => $grandTotal
+        ], 200);
     }
 }

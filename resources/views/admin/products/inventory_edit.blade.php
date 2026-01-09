@@ -52,14 +52,14 @@
                                         </div> 
                                         @endif
 
-                                        @if($product->product_type == 'customise')
+                                        {{-- @if($product->product_type == 'customise')
                                         <div class="mb-3 col-md-6">
                                             <label class="form-label">Customise Image Need</label>
                                             <div>
                                                 <input data-parsley-type="number" type="number" value="{{ $product->need_image }}" class="form-control" required placeholder="Enter number of image need" name="need_image">
                                             </div>
                                         </div> 
-                                        @endif
+                                        @endif --}}
                                     </div>
                                 </div>
                             </div>

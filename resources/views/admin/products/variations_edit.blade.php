@@ -94,6 +94,9 @@
                                                                 <th>Name</th>
                                                                 <th>Price</th>
                                                                 <th>Stock</th>
+                                                                @if($product->product_type == 'customise')
+                                                                <th>Need Image From User</th>
+                                                                @endif
                                                                 <th>Actions</th>
                                                             </tr>
                                                         </thead>
@@ -128,6 +131,11 @@
                                                                         data-id="{{ $option->id }}"
                                                                         value="{{ $option->stock }}">
                                                                 </td>
+                                                                @if($product->product_type == 'customise')
+                                                                <td>
+                                                                    <input type="number" class="form-control option-image-need" data-id="{{ $option->id }}" value="{{ $option->need_image }}"> 
+                                                                </td>
+                                                                @endif
                                                                 <td>
                                                                     <form action="{{ route('products.destroyVariationOption', $option->id) }}" method="POST" style="display:inline;">
                                                                         @csrf
@@ -190,6 +198,11 @@
                                             
                                             <label>Stock</label>
                                             <input type="number" name="stock" class="form-control mb-3">
+
+                                            @if($product->product_type == 'customise')
+                                            <label>Customise Image Need</label>
+                                            <input type="number" class="form-control mb-3" name="need_image"> 
+                                            @endif
                                     
                                             <button type="submit" class="btn btn-primary mt-2">Save Option</button>
                                         </form>
@@ -364,7 +377,8 @@
                 _token: "{{ csrf_token() }}",
                 variation_name: row.find('.option-name').val(),
                 price: row.find('.option-price').val(),
-                stock: row.find('.option-stock').val()
+                stock: row.find('.option-stock').val(),
+                need_image: row.find('.option-image-need').val()
             }, function (res) {
                 if (res.success) {
                     showToast('success', 'Updated', res.message);

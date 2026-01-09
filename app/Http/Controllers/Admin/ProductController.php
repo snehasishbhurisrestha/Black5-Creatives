@@ -473,6 +473,7 @@ class ProductController extends Controller implements HasMiddleware
             'value' => $value,
             'price' => $request->price,
             'stock' => $request->stock,
+            'need_image' => $request->need_image,
         ]);
     
         // If it's an image, use Spatie Media Library
@@ -531,6 +532,7 @@ class ProductController extends Controller implements HasMiddleware
             'variation_name' => 'required|string|max:255',
             'price' => 'nullable|numeric',
             'stock' => 'nullable|integer',
+            'need_image' => 'nullable|integer',
             'value' => 'nullable'
         ]);
 
