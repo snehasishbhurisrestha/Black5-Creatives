@@ -99,7 +99,7 @@ class CategoryController extends Controller implements HasMiddleware
             'slug' => 'nullable|max:255',
             'parent_id' => 'nullable|exists:categories,id',
             'description' => 'nullable',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'banner_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:9216',
             'is_visible' => 'required|in:0,1'
         ]);
