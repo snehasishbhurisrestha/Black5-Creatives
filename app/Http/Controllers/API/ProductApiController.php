@@ -292,4 +292,45 @@ class ProductApiController extends Controller
         return apiResponse(true, 'Related products', ['product' => $relatedProducts], 200);
     }
 
+    public function search(Request $request)
+    {
+        $queryText = trim($request->input('query'));
+
+        $query = Product::with(['categories', 'variations.options']);
+
+        if (!empty($queryText)) {
+            $keywords = explode(' ', $queryText);
+
+            $query->where(function ($q) use ($keywords) {
+                foreach ($keywords as $word) {
+                    $q->where(function ($sub) use ($word) {
+                        $sub->where('name', 'LIKE', "%$word%")
+                            ->orWhere('slug', 'LIKE', "%$word%")
+                            ->orWhere('sort_description', 'LIKE', "%$word%")
+                            ->orWhere('long_description', 'LIKE', "%$word%")
+                            ->orWhere('price', 'LIKE', "%$word%")
+
+                            // Category search
+                            ->orWhereHas('categories', function ($cat) use ($word) {
+                                $cat->where('name', 'LIKE', "%$word%");
+                            })
+
+                            // Variation & option search
+                            ->orWhereHas('variations.options', function ($var) use ($word) {
+                                $var->where('name', 'LIKE', "%$word%");
+                            });
+                    });
+                }
+            });
+        }
+
+        // Only active products
+        $query->where('is_visible', 1)
+            ->whereIn('product_type', ['simple', 'attribute']);
+
+        $products = $query->paginate(10);
+
+        return apiResponse(true, 'Search Results', ['products' => $products], 200);
+    }
+
 }

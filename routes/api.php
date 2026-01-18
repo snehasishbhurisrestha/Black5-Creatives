@@ -46,6 +46,8 @@ Route::get('/products/{slug}', [ProductApiController::class, 'show']);
 Route::get('/products/{slug}/related', [ProductApiController::class, 'related_products']);
 Route::post('/recently-viewed-products', [ProductApiController::class, 'recently_viewed_products']);
 
+Route::get('/product/search', [ProductApiController::class, 'search']);
+
 Route::get('/auth/google/generate-url', [GoogleAuthApiController::class, 'redirectToGoogle']);
 Route::get('/auth/google/callback', [GoogleAuthApiController::class, 'handleGoogleCallback']);
 
@@ -75,6 +77,8 @@ Route::get('/pages/{slug}', [PagesApiController::class, 'show']);
 Route::get('/category-offer/{category_id}',[CategoryFreeOfferAPIController::class, 'getOffer']);
 
 Route::get('/get-silver-card-offer',[SilverCardApiController::class, 'index']);
+
+Route::get('customise-get', [CustomiseApiController::class, 'index']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user/category-offer/{category_id}',[CategoryFreeOfferAPIController::class, 'getOffer']);
@@ -114,8 +118,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/user/delete-addresses/{id}', [UserApiController::class, 'deleteAddress']); 
 
     Route::post('reviews/store', [ProductReviewApiController::class, 'store']);
-
-    Route::get('customise-get', [CustomiseApiController::class, 'index']);
 });
 
 Route::get('/countries', [LocationApiController::class, 'getCountries']);
