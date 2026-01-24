@@ -82,7 +82,7 @@ class BrandController extends Controller implements HasMiddleware
     {
         $brand = Brand::find($id);
         $brands = Brand::where('parent_id',null)->get();
-        return view('admin.Brand.edit',compact('brand','brands'));
+        return view('admin.brand.edit',compact('brand','brands'));
     }
 
     public function update(Request $request, string $id)
