@@ -11,7 +11,7 @@ class Cart extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia;
 
-    protected $fillable = ['user_id', 'product_id', 'product_variation_options_id', 'product_variation_options_id2', 'quantity', 'brand_name', 'model_name'];
+    protected $fillable = ['user_id', 'product_id', 'product_variation_options_id', 'product_variation_options_id2', 'quantity', 'brand_name', 'model_name', 'media_id'];
 
     public function product()
     {

@@ -92,6 +92,7 @@ class CartApiController extends Controller
             'quantity' => $request->quantity,
             'brand_name' => $request->brand_name,
             'model_name' => $request->model_name,
+            'media_id' => $request->media_id
         ]);
 
         // if ($request->filled('choice_image')) {
