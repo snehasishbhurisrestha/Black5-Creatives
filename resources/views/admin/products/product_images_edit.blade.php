@@ -87,6 +87,22 @@
                                                             @else
                                                                 <a href="javascript:void(0)" class="float-start btn btn-secondary btn-sm mt-1 waves-effect btn-set-image-main" style="padding-bottom: 0px;padding-top: 0px;padding-right: 4px;padding-left: 4px;" data-file-id="{{ $image->getCustomProperty('file_id') }}">Main</a>
                                                             @endif
+                                                            <br>
+
+
+                                                            <div class="mt-1 row" style="z-index: 999;">
+                                                                <label class="small">Need Images</label>
+
+                                                                <input 
+                                                                    type="number"
+                                                                    min="0"
+                                                                    class="form-control form-control-sm need-image-input"
+                                                                    style="width:80px"
+                                                                    data-file-id="{{ $image->getCustomProperty('file_id') }}"
+                                                                    value="{{ $image->getCustomProperty('need_image', 0) }}"
+                                                                >
+                                                            </div>
+
                                                             
                                                         </li>
                                                     <?php endforeach;
@@ -304,5 +320,30 @@
                 }
             });
         });
+    </script>
+    <script>
+        $(document).on('change', '.need-image-input', function () {
+
+            let fileId = $(this).data('file-id');
+            let count  = $(this).val();
+
+            $.ajax({
+                type: "POST",
+                url: "{{ route('products.update-need-image') }}",
+                data: {
+                    file_id: fileId,
+                    count: count,
+                    product_id: "{{ request()->segment(4) }}",
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function(res){
+                    if(res.success){
+                        toastr.success('Image requirement updated');
+                    }
+                }
+            });
+
+        });
+
     </script>
 @endsection

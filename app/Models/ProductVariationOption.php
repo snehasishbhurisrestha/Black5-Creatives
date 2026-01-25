@@ -55,6 +55,7 @@ class ProductVariationOption extends Model implements HasMedia
                 'url' => $file->getUrl(),
                 'is_main' => $file->custom_properties['is_main'] ?? false,
                 'file_id' => $file->custom_properties['file_id'] ?? null,
+                'need_image' => $file->custom_properties['need_image'] ?? null,
             ];
         })->values();
     }

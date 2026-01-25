@@ -266,7 +266,8 @@ class ProductController extends Controller implements HasMiddleware
                     'file_id' => $request->file_id,
                     'option_id' => $optionId,
                     'option_name' => $optionName,
-                    'is_main' => false
+                    'is_main' => false,
+                    'need_image' => 0
                 ])
                 ->toMediaCollection('products-media');
 
@@ -302,6 +303,20 @@ class ProductController extends Controller implements HasMiddleware
             } else {
                 $html .= '<a href="javascript:void(0)" class="float-start btn btn-secondary btn-sm waves-effect btn-set-image-main" style="padding: 0 4px;" data-file-id="' . $media->getCustomProperty('file_id') . '">Main</a>';
             }
+
+            $need = $media->getCustomProperty('need_image', 0);
+
+            $html .= '
+            <div class="mt-1">
+                <label class="small">Need Images</label>
+                <input type="number"
+                    min="0"
+                    value="'.$need.'"
+                    class="form-control form-control-sm need-image-input"
+                    style="width:80px"
+                    data-file-id="'.$media->getCustomProperty('file_id').'">
+            </div>';
+
 
             return response()->json(['html' => $html]);
         }
@@ -369,6 +384,30 @@ class ProductController extends Controller implements HasMiddleware
 
         return response()->json(['html' => $html]);
     }
+
+    public function updateNeedImageCount(Request $request)
+    {
+        $request->validate([
+            'file_id' => 'required',
+            'count' => 'required|integer|min:0|max:50',
+            'product_id' => 'required'
+        ]);
+
+        $product = Product::findOrFail($request->product_id);
+
+        $media = $product->getMedia('products-media')
+            ->firstWhere('custom_properties.file_id', $request->file_id);
+
+        if (!$media) {
+            return response()->json(['success' => false]);
+        }
+
+        $media->setCustomProperty('need_image', $request->count)
+            ->save();
+
+        return response()->json(['success' => true]);
+    }
+
 
     public function veriation_edit(Request $request){
         if(request()->segment(4) == ''){

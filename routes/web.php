@@ -190,6 +190,8 @@ Route::middleware('auth')->group(function () {
                 Route::post('delete-product-images','delete_product_media')->name('products.delete-product-images');
                 Route::post('set-main-product-image','set_main_product_image')->name('products.set-main-product-image');
                 Route::post('product-images-process','product_images_process')->name('products.product-images-process');
+                Route::post('/product/image-need-count', [ProductController::class, 'updateNeedImageCount'])->name('products.update-need-image');
+
 
                 Route::get('product-veriation-edit/{id?}','veriation_edit')->name('products.product-veriation-edit');
                 Route::post('product-variations/store','storeVariation')->name('products.variation.store');
