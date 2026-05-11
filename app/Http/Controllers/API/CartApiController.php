@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Product;
 use App\Models\ProductVariationOption;
 use App\Models\Cart;
+use App\Models\AppliedCoupon;
+use App\Models\Coupon;
 use Illuminate\Support\Str;
 use App\Services\CouponService;
 
@@ -92,7 +94,8 @@ class CartApiController extends Controller
             'quantity' => $request->quantity,
             'brand_name' => $request->brand_name,
             'model_name' => $request->model_name,
-            'media_id' => $request->media_id
+            'media_id' => $request->media_id,
+            'customize_text' => $request->customize_text
         ]);
 
         // if ($request->filled('choice_image')) {
@@ -311,11 +314,19 @@ class CartApiController extends Controller
             ];
         });
 
-        $total_cart_item = $cartItems->count();
-        if($total_cart_item > 2){
+        // $total_cart_item = $cartItems->count();
+        // if($total_cart_item > 2){
+        //     $shipping_charge = 0;
+        // }else{
+        //     $shipping_charge = 60;
+        // }
+
+        $total_quantity = $cartItems->sum('quantity');
+
+        if ($total_quantity >= 3) {
             $shipping_charge = 0;
-        }else{
-            $shipping_charge = 50;
+        } else {
+            $shipping_charge = 60;
         }
 
         $totalAmount = $data->sum('subtotal');
@@ -362,7 +373,7 @@ class CartApiController extends Controller
     public function apply_coupon(Request $request, CouponService $couponService)
     {
         $validator = Validator::make($request->all(), [
-            'coupon_code' => 'required|string'
+            'coupon_code' => 'required|string|exists:coupons,code'
         ]);
 
         if ($validator->fails()) {
@@ -371,65 +382,107 @@ class CartApiController extends Controller
 
         $userId = $request->user()->id;
 
-        // 1️⃣ Load cart items
-        $cartItems = Cart::with([
-            'product:id,total_price,product_type',
-            'variation:id,price,variation_name'
-        ])
-        ->where('user_id', $userId)
-        ->get();
+        // ✅ Check if user already applied a coupon
+        $alreadyApplied = AppliedCoupon::where('user_id', $userId)->first();
 
-        if ($cartItems->isEmpty()) {
-            return apiResponse(false, 'Cart is empty', null, 200);
+        if ($alreadyApplied) {
+            return apiResponse(false, 'You have already applied a coupon. Use or Remove it first to apply another.', [], 400);
         }
 
-        // 2️⃣ Convert cart → coupon items
-        $couponItems = $cartItems->map(function ($item) {
+        $coupon = Coupon::where('code',$request->coupon_code)->first();
 
-            $price = 0;
+        AppliedCoupon::create([
+            'user_id' => $userId,
+            'coupon_id' => $coupon->id
+        ]);
 
-            if ($item->variation && $item->variation->price) {
-                $price = $item->variation->price;
-            } else {
-                $price = $item->product->total_price;
-            }
+        return apiResponse(true,'Coupon Applied Successfully',null,200);
 
-            return (object)[
-                'price' => $price,
-                'qty' => $item->quantity,
-                'category' => 'phone-case',
-                'product_type' => $item->variation
-                                ? $item->variation->variation_name
-                                : null,
-            ];
-        });
+        // // 1️⃣ Load cart items
+        // $cartItems = Cart::with([
+        //     'product:id,total_price,product_type',
+        //     'product.categories:id,slug,name',
+        //     'variation:id,price,variation_name'
+        // ])
+        // ->where('user_id', $userId)
+        // ->get();
 
-        // return $couponItems;
+        // if ($cartItems->isEmpty()) {
+        //     return apiResponse(false, 'Cart is empty', null, 200);
+        // }
 
-        // 3️⃣ Apply coupon
-        $result = $couponService->apply($request->coupon_code, $couponItems);
+        // // 2️⃣ Convert cart → coupon items
+        // $couponItems = $cartItems->map(function ($item) {
 
-        if (!$result['success']) {
-            return apiResponse(false, $result['message'], null, 200);
+        //     $price = 0;
+
+        //     if ($item->variation && $item->variation->price) {
+        //         $price = $item->variation->price;
+        //     } else {
+        //         $price = $item->product->total_price;
+        //     }
+
+        //     // Get all category slugs
+        //     $categories = $item->product->categories
+        //                     ->pluck('slug')
+        //                     ->toArray();
+
+        //     return (object)[
+        //         'price' => $price,
+        //         'qty' => $item->quantity,
+        //         'categories' => $categories,
+        //         'product_type' => $item->variation
+        //                         ? $item->variation->variation_name
+        //                         : null,
+        //     ];
+        // });
+
+        // // return $couponItems;
+
+        // // 3️⃣ Apply coupon
+        // $result = $couponService->apply($request->coupon_code, $couponItems);
+
+        // if (!$result['success']) {
+        //     return apiResponse(false, $result['message'], null, 200);
+        // }
+
+        // // 4️⃣ Calculate totals
+        // $subtotal = $couponItems->sum(fn($i) => $i->price * $i->qty);
+
+        // $discount = $result['discount'] ?? 0;
+
+        // // Shipping logic
+        // $shipping = $result['type'] === 'free_shipping' ? 0 : 50;
+
+        // $grandTotal = max(($subtotal + $shipping) - $discount, 0);
+
+        // return apiResponse(true, 'Coupon applied successfully', [
+        //     'coupon_code' => $request->coupon_code,
+        //     'coupon_type' => $result['type'],
+        //     'subtotal' => $subtotal,
+        //     'discount' => $discount,
+        //     'shipping' => $shipping,
+        //     'grand_total' => $grandTotal
+        // ], 200);
+    }
+
+    public function remove_coupon(Request $request){
+        $validator = Validator::make($request->all(), [
+            'coupon_code' => 'required|string|exists:coupons,code'
+        ]);
+
+        if ($validator->fails()) {
+            return apiResponse(false, 'Validation error', $validator->errors(), 422);
         }
 
-        // 4️⃣ Calculate totals
-        $subtotal = $couponItems->sum(fn($i) => $i->price * $i->qty);
+        $userId = $request->user()->id;
+        $coupon = Coupon::where('code',$request->coupon_code)->first();
 
-        $discount = $result['discount'] ?? 0;
+        // ✅ Check if user already applied a coupon
+        $alreadyApplied = AppliedCoupon::where('user_id', $userId)->where('coupon_id',$coupon->id)->first();
 
-        // Shipping logic
-        $shipping = $result['type'] === 'free_shipping' ? 0 : 50;
-
-        $grandTotal = max(($subtotal + $shipping) - $discount, 0);
-
-        return apiResponse(true, 'Coupon applied successfully', [
-            'coupon_code' => $request->coupon_code,
-            'coupon_type' => $result['type'],
-            'subtotal' => $subtotal,
-            'discount' => $discount,
-            'shipping' => $shipping,
-            'grand_total' => $grandTotal
-        ], 200);
+        $alreadyApplied->delete();
+        
+        return apiResponse(true,'Coupon Removed Successfully',null,200);   
     }
 }

@@ -86,7 +86,8 @@
             // $totalPrice = $carts->sum(function ($cart) {
             //     return $cart->product->total_price * $cart->quantity;
             // });
-            $cart_count = Cart::where('user_id', $userId)->count(); 
+            // $cart_count = Cart::where('user_id', $userId)->count(); 
+            $cart_count = Cart::where('user_id', $userId)->sum('quantity');
 
             return $cart_count;
         }

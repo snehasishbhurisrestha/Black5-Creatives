@@ -122,10 +122,34 @@
 
                                         {{-- STATUS --}}
                                         <td>
-                                            @if($coupon->is_active)
+                                            {{-- @if($coupon->is_active)
                                                 <span class="badge bg-success">Active</span>
                                             @else
                                                 <span class="badge bg-danger">Inactive</span>
+                                            @endif
+                                        </td> --}}
+
+                                        {{-- STATUS --}}
+                                        <td>
+                                            @php
+                                                $now = now();
+                                            @endphp
+
+                                            {{-- Active / Inactive --}}
+                                            @if(!$coupon->is_active)
+                                                <span class="badge bg-secondary">Inactive</span>
+
+                                            {{-- Expired --}}
+                                            @elseif($coupon->end_date && $coupon->end_date->lt($now))
+                                                <span class="badge bg-danger">Expired</span>
+
+                                            {{-- Upcoming --}}
+                                            @elseif($coupon->start_date && $coupon->start_date->gt($now))
+                                                <span class="badge bg-warning text-dark">Upcoming</span>
+
+                                            {{-- Active & Valid --}}
+                                            @else
+                                                <span class="badge bg-success">Active</span>
                                             @endif
                                         </td>
 

@@ -30,6 +30,50 @@
             <div class="tab-pane active" id="Student-all">
                 <div class="card mt-4">
                     <div class="card-body">
+                        <form method="GET" action="{{ route('product.index') }}">
+                            <div class="row mb-4">
+
+                                <div class="col-md-4">
+                                    <label>Main Category</label>
+                                    <select name="category" id="category" class="form-control">
+                                        <option value="">All Category</option>
+                                        @foreach($categories as $category)
+                                            <option value="{{ $category->id }}"
+                                                {{ request('category') == $category->id ? 'selected' : '' }}>
+                                                {{ $category->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label>Sub Category</label>
+                                    <select name="subcategory" id="subcategory" class="form-control">
+                                        <option value="">All Subcategory</option>
+
+                                        @foreach($subcategories as $subcategory)
+                                            <option
+                                                value="{{ $subcategory->id }}"
+                                                data-parent="{{ $subcategory->parent_id }}"
+                                                {{ request('subcategory') == $subcategory->id ? 'selected' : '' }}>
+                                                {{ $subcategory->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4 d-flex align-items-end gap-2">
+                                    <button class="btn btn-primary mx-3">
+                                        Filter
+                                    </button>
+
+                                    <a href="{{ route('product.index') }}" class="btn btn-danger">
+                                        Reset
+                                    </a>
+                                </div>
+
+                            </div>
+                        </form>
                         <div class="table-responsive">
                             <table class="table table-hover js-basic-example dataTable table-striped table_custom border-style spacing5">
                                 <thead class="table-light">

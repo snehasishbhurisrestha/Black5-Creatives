@@ -10,3 +10,14 @@ if (!function_exists('apiResponse')) {
         ], $statusCode);
     }
 }
+
+if (!function_exists('apiResponse')) {
+    function getRootCategory($category)
+    {
+        while ($category->parent_id) {
+            $category = $category->parent;
+        }
+
+        return $category;
+    }
+}

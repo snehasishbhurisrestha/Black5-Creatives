@@ -21,10 +21,14 @@ use App\Http\Controllers\API\{
     CategoryFreeOfferAPIController,
     SilverCardApiController,
     CustomiseApiController,
+    EnquiryApiController,
 };
 
 
 Route::post('contact-us',[ContactUsApiController::class,'store']);
+
+Route::post('enquiry-submit',[EnquiryApiController::class,'store']);
+
 
 Route::get('get-faqs',[FAQApiController::class,'index']);
 Route::post('submit-question',[FAQApiController::class,'store']);
@@ -81,6 +85,8 @@ Route::get('/get-silver-card-offer',[SilverCardApiController::class, 'index']);
 Route::get('customise-get', [CustomiseApiController::class, 'index']);
 
 Route::middleware('auth:sanctum')->group(function () {
+
+    Route::get('/get-silver-card-offer-auth',[SilverCardApiController::class, 'index']);
     Route::get('/user/category-offer/{category_id}',[CategoryFreeOfferAPIController::class, 'getOffer']);
     Route::get('/user/category-offer-details/{category_id}',[CategoryFreeOfferAPIController::class, 'platinum_card_details']);
 
@@ -96,6 +102,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/remove-from-cart', [CartApiController::class, 'remove_from_cart']);
 
     Route::post('/apply-coupon', [CartApiController::class, 'apply_coupon']);
+    Route::delete('/remove-coupon', [CartApiController::class, 'remove_coupon']);
 
     Route::get('/get-saved-address', [CheckoutApiController::class, 'get_saved_address']);
     Route::post('/add-new-addresss-book', [CheckoutApiController::class, 'add_new_addresss_book']);

@@ -80,6 +80,29 @@
                                     <textarea rows="4" class="form-control no-resize summernote" placeholder="Enter Description" name="description">{{ $category->description }}</textarea>
                                 </div>
                             </div>
+
+                            <hr>
+
+                            <div class="col-12 mb-3">
+                                <label class="form-label">H1</label>
+                                <input type="text" class="form-control" name="h1" value="{{ old('h1', $category->h1 ?? '') }}">
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Meta Title</label>
+                                <input type="text" class="form-control" name="meta_title" value="{{ old('meta_title', $category->meta_title ?? '') }}">
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Meta Keywords</label>
+                                <input type="text" class="form-control" name="meta_keywords" value="{{ old('meta_keywords', $category->meta_keywords ?? '') }}">
+                                <small class="text-muted">Separate keywords with commas</small>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Meta Description</label>
+                                <textarea class="form-control no-resize" name="meta_description" rows="3">{{ old('meta_description', $category->meta_description ?? '') }}</textarea>
+                            </div>
                         </div>
                     </div>
                 </div>

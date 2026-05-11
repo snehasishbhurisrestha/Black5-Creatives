@@ -21,7 +21,12 @@
                 </ol>
             </div>
             <ul class="nav nav-tabs page-header-tab">
-                <li class="nav-item"><a class="btn btn-info" href="{{ route('product.index') }}"><i class="fa fa-arrow-left me-2"></i>Back</a></li>
+                {{-- <li class="nav-item"><a class="btn btn-info" href="{{ route('product.index') }}"><i class="fa fa-arrow-left me-2"></i>Back</a></li> --}}
+                <li class="nav-item">
+                    <button type="button" onclick="history.back()" class="btn btn-info">
+                        <i class="fa fa-arrow-left me-2"></i>Back
+                    </button>
+                </li>
             </ul>
         </div>
     </div>

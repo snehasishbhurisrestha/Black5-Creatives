@@ -58,6 +58,11 @@ class CategoryController extends Controller implements HasMiddleware
         $category->parent_id = $request->parent_id;
         $category->description = $request->description;
 
+        $category->h1 = $request->h1;
+        $category->meta_title = $request->meta_title;
+        $category->meta_keywords = $request->meta_keywords;
+        $category->meta_description = $request->meta_description;
+
         if ($request->hasFile('image')) {
             $category->addMedia($request->file('image'))->toMediaCollection('category');
         }
@@ -125,6 +130,11 @@ class CategoryController extends Controller implements HasMiddleware
             $category->clearMediaCollection('category-banner');
             $category->addMedia($request->file('banner_image'))->toMediaCollection('category-banner');
         }
+
+        $category->h1 = $request->h1;
+        $category->meta_title = $request->meta_title;
+        $category->meta_keywords = $request->meta_keywords;
+        $category->meta_description = $request->meta_description;
 
         $category->is_visible = $request->is_visible;
         $category->is_home = $request->is_home;

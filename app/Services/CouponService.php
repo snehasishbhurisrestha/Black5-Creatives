@@ -7,131 +7,180 @@ use Carbon\Carbon;
 
 class CouponService
 {
-    public function apply($code, $cartItems)
+    public function apply($code, $items)
     {
-        $coupon = Coupon::where('code', $code)->first();
+        // 1️⃣ Find coupon
+        $coupon = Coupon::where('code', $code)
+                        ->where('is_active', 1)
+                        ->first();
 
-        if(!$coupon){
-            return $this->error("Invalid coupon");
+        if (!$coupon) {
+            return $this->error('Invalid coupon code');
         }
 
-        if(!$coupon->is_active){
-            return $this->error("Coupon is inactive");
+        // 2️⃣ Expiry check
+        if ($coupon->expiry_date && Carbon::now()->gt($coupon->expiry_date)) {
+            return $this->error('Coupon has expired');
         }
 
-        if($coupon->start_date && now()->lt($coupon->start_date)){
-            return $this->error("Coupon not started yet");
+        // 3️⃣ Usage limit check
+        if ($coupon->usage_limit && $coupon->used_count >= $coupon->usage_limit) {
+            return $this->error('Coupon usage limit reached');
         }
 
-        if($coupon->end_date && now()->gt($coupon->end_date)){
-            return $this->error("Coupon expired");
+        // 4️⃣ Calculate subtotal
+        $subtotal = 0;
+
+        foreach ($items as $item) {
+            $subtotal += $item->price * $item->qty;
         }
 
-        // Filter eligible items based on category/product type
-        $eligibleItems = $this->filterEligible($cartItems, $coupon);
-
-        if($eligibleItems->count() == 0){
-            return $this->error("Coupon not applicable on these products");
+        // 5️⃣ Minimum cart value
+        if ($coupon->min_cart_value && $subtotal < $coupon->min_cart_value) {
+            return $this->error(
+                "Minimum order ₹{$coupon->min_cart_value} required"
+            );
         }
 
-        // Required min qty check
-        if($coupon->min_qty && $eligibleItems->sum('qty') < $coupon->min_qty){
-            return $this->error("Minimum {$coupon->min_qty} items required");
+        // 6️⃣ Filter eligible items
+        $eligibleItems = $this->filterEligibleItems($coupon, $items);
+
+        if (count($eligibleItems) == 0 && $coupon->type !== 'free_shipping') {
+            return $this->error('Coupon not applicable to these products');
         }
 
-        // Required min purchase check
-        $subtotal = $eligibleItems->sum(fn($i)=> $i->price * $i->qty);
+        // 7️⃣ Calculate discount
+        $discount = $this->calculateDiscount(
+            $coupon,
+            $eligibleItems,
+            $subtotal
+        );
 
-        if($coupon->minimum_purchase && $subtotal < $coupon->minimum_purchase){
-            return $this->error("Minimum purchase ₹{$coupon->minimum_purchase} required");
+        // 8️⃣ Max discount limit
+        if ($coupon->max_discount && $discount > $coupon->max_discount) {
+            $discount = $coupon->max_discount;
         }
 
-        // Apply discount based on type
-        return $this->applyDiscount($coupon, $eligibleItems, $cartItems);
+        return [
+            'success'  => true,
+            'type'     => $coupon->type,
+            'discount' => round($discount, 2),
+            'message'  => 'Coupon applied successfully'
+        ];
     }
 
+    // ======================================
+    // Filter Items Based on Coupon Rules
+    // ======================================
 
-    private function filterEligible($cartItems, $coupon)
+    private function filterEligibleItems($coupon, $items)
     {
-        return $cartItems->filter(function($item) use ($coupon){
+        $eligible = [];
 
-            $type = $item->product_type;     // hybrid, soft, hard, frame_premium etc
-            $category = $item->category;     // case, wall_art
+        // Coupon categories
+        $couponCategories = [];
 
-            if($coupon->category && $coupon->category != $category){
-                return false;
+        if ($coupon->categories) {
+            $couponCategories = array_map(
+                'trim',
+                explode(',', $coupon->categories)
+            );
+        }
+
+        // Coupon product types
+        $couponTypes = [];
+
+        if ($coupon->product_types) {
+            $couponTypes = array_map(
+                'trim',
+                explode(',', $coupon->product_types)
+            );
+        }
+
+        foreach ($items as $item) {
+
+            $matchCategory = true;
+            $matchType     = true;
+
+            // Category check
+            if (!empty($couponCategories)) {
+
+                $matchCategory = !empty(
+                    array_intersect(
+                        $couponCategories,
+                        $item->categories ?? []
+                    )
+                );
             }
 
-            if($coupon->product_type && $coupon->product_type != $type){
-                return false;
+            // Product type check
+            if (!empty($couponTypes)) {
+
+                $matchType = in_array(
+                    $item->product_type,
+                    $couponTypes
+                );
             }
 
-            return true;
-        });
+            if ($matchCategory && $matchType) {
+                $eligible[] = $item;
+            }
+        }
+
+        return $eligible;
     }
 
+    // ======================================
+    // Discount Calculation
+    // ======================================
 
-    private function applyDiscount($coupon, $eligibleItems, $cartItems)
+    private function calculateDiscount($coupon, $items, $subtotal)
     {
         $discount = 0;
 
         switch ($coupon->type) {
 
+            // Percentage Discount
             case 'percentage':
-                $discount = $eligibleItems->sum(fn($i)=> ($i->price * $i->qty));
-                $discount = ($discount * $coupon->value) / 100;
-                break;
 
-            case 'flat':
-                $discount = $coupon->value;
-                break;
+                $eligibleTotal = 0;
 
-            case 'free_shipping':
-                return [
-                    'success' => true,
-                    'type' => 'free_shipping',
-                    'discount' => 0
-                ];
-
-            case 'price_override':
-                foreach($eligibleItems as $item){
-                    $discount += ($item->price - $coupon->override_price) * $item->qty;
+                foreach ($items as $item) {
+                    $eligibleTotal += $item->price * $item->qty;
                 }
+
+                $discount = ($eligibleTotal * $coupon->value) / 100;
+
                 break;
 
-            case 'bogo':
-                $discount = $this->applyBogo($coupon, $eligibleItems);
+            // Flat Discount
+            case 'flat':
+
+                $discount = $coupon->value;
+
                 break;
-        }
 
-        return [
-            'success' => true,
-            'type' => $coupon->type,
-            'discount' => max($discount,0)
-        ];
-    }
+            // Free Shipping
+            case 'free_shipping':
 
+                $discount = 0;
 
-    private function applyBogo($coupon, $items)
-    {
-        $discount = 0;
-
-        foreach($items as $item){
-
-            $freeUnits = intdiv($item->qty, $coupon->buy_qty) * $coupon->get_qty;
-
-            $discount += $freeUnits * $item->price;
+                break;
         }
 
         return $discount;
     }
 
+    // ======================================
+    // Error Response
+    // ======================================
 
-    private function error($msg)
+    private function error($message)
     {
         return [
-            'success' => false,
-            'message' => $msg
+            'success'  => false,
+            'message'  => $message,
+            'discount' => 0
         ];
     }
 }

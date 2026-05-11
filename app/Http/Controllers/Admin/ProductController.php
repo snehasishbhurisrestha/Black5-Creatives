@@ -28,11 +28,54 @@ class ProductController extends Controller implements HasMiddleware
         ];
     }
 
-    public function index()
+    /*public function index()
     {
         // $proucts = Product::all();
         $proucts = Product::with('categories')->get();
         return view('admin.products.index',compact('proucts'));
+    }*/
+
+    public function index(Request $request)
+    {
+        $query = Product::with(['categories', 'variations']);
+
+        // Parent category filter
+        if ($request->filled('category')) {
+            $categoryId = $request->category;
+
+            $childIds = Category::where('parent_id', $categoryId)
+                        ->pluck('id')
+                        ->toArray();
+
+            $ids = array_merge([$categoryId], $childIds);
+
+            $query->whereHas('categories', function ($q) use ($ids) {
+                $q->whereIn('categories.id', $ids);
+            });
+        }
+
+        // Subcategory filter
+        if ($request->filled('subcategory')) {
+            $query->whereHas('categories', function ($q) use ($request) {
+                $q->where('categories.id', $request->subcategory);
+            });
+        }
+
+        $proucts = $query->latest()->get();
+
+        $categories = Category::whereNull('parent_id')
+                        ->orWhere('parent_id', 0)
+                        ->get();
+
+        $subcategories = Category::whereNotNull('parent_id')
+                        ->where('parent_id', '!=', 0)
+                        ->get();
+
+        return view('admin.products.index', compact(
+            'proucts',
+            'categories',
+            'subcategories'
+        ));
     }
 
     public function basic_info_create(){
