@@ -16,7 +16,7 @@ class Product extends Model implements HasMedia
         'weight', 'dimensions','is_home', 'is_special', 'is_featured', 'is_best_selling', 'is_active'
     ];
 
-    protected $appends = ['image_link'];
+    protected $appends = ['image_link', 'primary_category'];
     
     public function product_subcategories()
     {
@@ -69,5 +69,25 @@ class Product extends Model implements HasMedia
     public function offers()
     {
         return $this->belongsToMany(Offer::class, 'offer_product');
+    }
+
+    public function primaryCategory()
+    {
+        return $this->belongsTo(Category::class, 'primary_category_id');
+    }
+
+    public function getPrimaryCategoryAttribute()
+    {
+        $category = $this->relationLoaded('primaryCategory')
+            ? $this->getRelation('primaryCategory')
+            : $this->primaryCategory()->select('id','name','slug')->first();
+
+        return $category
+            ? [
+                'id' => $category->id,
+                'name' => $category->name,
+                'slug' => $category->slug,
+            ]
+            : null;
     }
 }

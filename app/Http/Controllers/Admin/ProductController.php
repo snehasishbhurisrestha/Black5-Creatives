@@ -80,9 +80,10 @@ class ProductController extends Controller implements HasMiddleware
 
     public function basic_info_create(){
         $categorys = Category::where('is_visible',1)->where('parent_id',null)->get();
+        $categorys_all = Category::where('is_visible',1)->get();
         $brands = Brand::where('is_visible',1)->where('parent_id',null)->get();
         // $brands = Brand::where('is_visible',1)->get();
-        return view('admin.products.basic_info',compact('categorys','brands'));
+        return view('admin.products.basic_info',compact('categorys','brands','categorys_all'));
     }
 
     public function basic_info_process(Request $request){
@@ -97,6 +98,7 @@ class ProductController extends Controller implements HasMiddleware
         $product->name = $request->product_name;
         $product->slug = createSlug($request->product_name, Product::class);
         $product->brand_id = $request->brand;
+        $product->primary_category_id = $request->primary_category_id;
         $product->product_type = $request->product_type ?? 'simple';
         $product->sort_description = $request->sort_description;
         $product->long_description = $request->long_description;
@@ -151,8 +153,9 @@ class ProductController extends Controller implements HasMiddleware
         $product = Product::find($request->id);
         $selectedCategories = $product->categories->pluck('id')->toArray();
         $selectedBrands = $product->brands->pluck('id')->toArray();
+        $categorys_all = Category::where('is_visible',1)->get();
         // $brands = Brand::where('is_visible',1)->get();
-        return view('admin.products.basic_info_edit',compact('categorys','product','selectedCategories','brands','selectedBrands'));
+        return view('admin.products.basic_info_edit',compact('categorys','product','selectedCategories','brands','selectedBrands','categorys_all'));
     }
 
     public function basic_info_edit_process(Request $request){
@@ -169,6 +172,7 @@ class ProductController extends Controller implements HasMiddleware
         $product->meta_description = $request->meta_description;
 
         $product->brand_id = $request->brand;
+        $product->primary_category_id = $request->primary_category_id;
         $product->product_type = $request->product_type;
         $product->sort_description = $request->sort_description;
         $product->long_description = $request->long_description;

@@ -60,6 +60,17 @@
                                             </div>
                                         </div> --}}
                                         <div class="col-12 mb-3">
+                                            <label class="form-label" for="primary_category_id">Primary Category</label>
+                                            <div>
+                                                <select class="form-control select2" id="primary_category_id" name="primary_category_id">
+                                                    <option value="" selected disabled>Select Primary Category ...</option>
+                                                    @foreach($categorys_all as $category)
+                                                    <option value="{{ $category->id }}" @if($category->id == old('primary_category_id')) selected @endif>{{ $category->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 mb-3">
                                             <label class="form-label">Sort Description</label>
                                             <textarea class="form-control no-resize summernote" name="sort_description" id=""></textarea>
                                         </div>
