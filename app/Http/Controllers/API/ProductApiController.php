@@ -45,6 +45,7 @@ class ProductApiController extends Controller
         // Filter active only
         $query->where('is_visible', 1);
         $query->whereIn('product_type', ['simple','attribute']);
+        $query->latest('id');
 
         $products = $query->paginate(3);
 
@@ -60,6 +61,7 @@ class ProductApiController extends Controller
             })
             ->where('is_visible', 1)
             ->whereIn('product_type', ['simple','attribute'])
+            
             ->paginate(6);
 
         return apiResponse(true, 'Category Products', ['products' => $products], 200);
@@ -266,28 +268,40 @@ class ProductApiController extends Controller
             ->where('slug',$slug)->first();
 
         // Get category IDs and brand IDs
-        $categoryIds = $product->categories->pluck('id')->toArray();
-        $brandIds = $product->brands->pluck('id')->toArray();
+        // $categoryIds = $product->categories->pluck('id')->toArray();
+        // $brandIds = $product->brands->pluck('id')->toArray();
 
-        // Fetch related products
+        // // Fetch related products
+        // $relatedProducts = Product::with([
+        //         'categories',
+        //         'brands',
+        //         'variations.options'
+        //     ])
+        //     ->where('id', '!=', $product->id) // exclude current product
+        //     ->where(function ($query) use ($categoryIds, $brandIds) {
+        //         $query->whereHas('categories', function ($q) use ($categoryIds) {
+        //             $q->whereIn('categories.id', $categoryIds);
+        //         })
+        //         ->orWhereHas('brands', function ($q) use ($brandIds) {
+        //             $q->whereIn('brands.id', $brandIds);
+        //         });
+        //     })
+        //     ->distinct()
+        //     ->whereIn('product_type', ['simple','attribute'])
+        //     ->take(10)
+        //     ->get();
+
         $relatedProducts = Product::with([
-                'categories',
-                'brands',
-                'variations.options'
-            ])
-            ->where('id', '!=', $product->id) // exclude current product
-            ->where(function ($query) use ($categoryIds, $brandIds) {
-                $query->whereHas('categories', function ($q) use ($categoryIds) {
-                    $q->whereIn('categories.id', $categoryIds);
-                })
-                ->orWhereHas('brands', function ($q) use ($brandIds) {
-                    $q->whereIn('brands.id', $brandIds);
-                });
-            })
-            ->distinct()
-            ->whereIn('product_type', ['simple','attribute'])
-            ->take(10)
-            ->get();
+            'categories',
+            'brands',
+            'variations.options'
+        ])
+        ->where('id', '!=', $product->id)
+        ->where('primary_category_id', $product->primary_category_id)
+        ->whereIn('product_type', ['simple', 'attribute'])
+        ->take(10)
+        ->latest('id')
+        ->get();
 
         return apiResponse(true, 'Related products', ['product' => $relatedProducts], 200);
     }

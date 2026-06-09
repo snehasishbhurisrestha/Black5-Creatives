@@ -51,9 +51,19 @@ class CategoryApiController extends Controller
 
     public function show($slug)
     {
-        $category = Category::with(['children', 'parent', 'products', 'products.variations.options'])
-            // ->findOrFail($id);
-            ->where('slug',$slug)->first();
+        // $category = Category::with(['children', 'parent', 'products', 'products.variations.options'])
+        //     // ->findOrFail($id);
+        //     ->where('slug',$slug)->first();
+        $category = Category::with([
+            'children',
+            'parent',
+            'products' => function ($query) {
+                $query->latest('id');
+            },
+            'products.variations.options'
+        ])
+        ->where('slug', $slug)
+        ->first();
 
         return apiResponse(true,'Categories',['category'=>$category],200);
     }
