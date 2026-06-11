@@ -49,4 +49,22 @@ class Category extends Model implements HasMedia
     {
         return $this->hasMany(FeaturePanel::class);
     }
+
+    public function getHierarchyAttribute()
+    {
+        $hierarchy = [];
+        $category = $this;
+
+        while ($category) {
+            array_unshift($hierarchy, [
+                'id' => $category->id,
+                'name' => $category->name,
+                'slug' => $category->slug,
+            ]);
+
+            $category = $category->parent;
+        }
+
+        return $hierarchy;
+    }
 }

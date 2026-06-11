@@ -76,7 +76,7 @@ class Product extends Model implements HasMedia
         return $this->belongsTo(Category::class, 'primary_category_id');
     }
 
-    public function getPrimaryCategoryAttribute()
+    /*public function getPrimaryCategoryAttribute()
     {
         $category = $this->relationLoaded('primaryCategory')
             ? $this->getRelation('primaryCategory')
@@ -89,5 +89,36 @@ class Product extends Model implements HasMedia
                 'slug' => $category->slug,
             ]
             : null;
+    }*/
+
+    public function getPrimaryCategoryAttribute()
+    {
+        $category = $this->relationLoaded('primaryCategory')
+            ? $this->getRelation('primaryCategory')
+            : $this->primaryCategory()->first();
+
+        if (!$category) {
+            return null;
+        }
+
+        $hierarchy = [];
+        $current = $category;
+
+        while ($current) {
+            array_unshift($hierarchy, [
+                'id' => $current->id,
+                'name' => $current->name,
+                'slug' => $current->slug,
+            ]);
+
+            $current = $current->parent;
+        }
+
+        return [
+            'id' => $category->id,
+            'name' => $category->name,
+            'slug' => $category->slug,
+            'hierarchy' => $hierarchy,
+        ];
     }
 }
