@@ -11,7 +11,7 @@ class Product extends Model implements HasMedia
 {
     use InteractsWithMedia;
 
-    protected $fillable = [ 'name','meta_title','meta_keywords','meta_description', 'slug', 'brand_id', 'product_type', 'short_description', 'long_description',
+    protected $fillable = [ 'name','meta_title','meta_keywords','meta_description', 'slug', 'brand_id', 'product_type', 'sort_description', 'long_description',
         'price', 'price', 'discount_rate', 'discount_price', 'gst_rate', 'gst_amount', 'total_price', 'stock', 'sku', 'barcode',
         'weight', 'dimensions','is_home', 'is_special', 'is_featured', 'is_best_selling', 'is_active'
     ];
